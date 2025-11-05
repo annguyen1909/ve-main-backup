@@ -1,0 +1,177 @@
+{
+  "home.hero.visual_title": {
+    "default": "VISUAL",
+    "file": "app/routes/($locale)._index/hero-section-backup.tsx",
+    "context": "Left hero big heading (backup file)"
+  },
+  "home.hero.ennode_title": {
+    "default": "ENNODE",
+    "file": "app/routes/($locale)._index/hero-section-backup.tsx",
+    "context": "Right hero big heading (backup file)"
+  },
+  "home.hero.title": {
+    "default": "ARCHVIZ STUDIO",
+    "file": "app/routes/($locale)._index/hero-section.tsx",
+    "context": "Main hero H1 (two-line title)"
+  },
+  "home.hero.subtitle": {
+    "default": "We unite diverse diverse departments for seamless collaboration",
+    "file": "app/routes/($locale)._index/hero-section.tsx",
+    "context": "Hero lead paragraph (note: contains duplicated word 'diverse diverse')"
+  },
+  "home.cta.we_visualize": {
+    "default": "WE VISUALIZE",
+    "file": "app/routes/($locale)._index/hero-section.tsx",
+    "context": "Small label above CTA (mobile and desktop)"
+  },
+  "home.cta.see_works": {
+    "default": "SEE WORKS",
+    "file": "app/routes/($locale)._index/hero-section.tsx",
+    "context": "Primary CTA linking to works (mobile & desktop)"
+  },
+  "home.cta.we_connect": {
+    "default": "WE CONNECT",
+    "file": "app/routes/($locale)._index/hero-section.tsx",
+    "context": "Small label above secondary CTA (mobile & desktop)"
+  },
+  "home.cta.more_about_us": {
+    "default": "MORE ABOUT US",
+    "file": "app/routes/($locale)._index/hero-section.tsx",
+    "context": "Secondary CTA linking to about (mobile & desktop)"
+  },
+
+  "news.title.part1": {
+    "default": "RELATED",
+    "file": "app/routes/($locale)._index/news-section.tsx",
+    "context": "News section title - first word"
+  },
+  "news.title.part2": {
+    "default": "NEWS",
+    "file": "app/routes/($locale)._index/news-section.tsx",
+    "context": "News section title - second word (styled red)"
+  },
+  "news.subtitle": {
+    "default": "Latest articles",
+    "file": "app/routes/($locale)._index/news-section.tsx",
+    "context": "Short subtitle under news title"
+  },
+  "news.cta_go_to_news": {
+    "default": "Go to news",
+    "file": "app/routes/($locale)._index/news-section.tsx",
+    "context": "Button/Link text to navigate to news index (bottom CTA)"
+  },
+
+  "process.title.part1": {
+    "default": "OUR WORK",
+    "file": "app/routes/($locale)._index/process-section.tsx",
+    "context": "Process section title - first part"
+  },
+  "process.title.part2": {
+    "default": "PROCESS",
+    "file": "app/routes/($locale)._index/process-section.tsx",
+    "context": "Process section title - second part (styled red)"
+  },
+
+  "nav.section.hero": {
+    "default": "Hero",
+    "file": "app/routes/($locale)._index/route.tsx",
+    "context": "ScrollProgress label for Hero section"
+  },
+  "nav.section.summary": {
+    "default": "Summary",
+    "file": "app/routes/($locale)._index/route.tsx",
+    "context": "ScrollProgress label for Summary section"
+  },
+  "nav.section.service": {
+    "default": "Service",
+    "file": "app/routes/($locale)._index/route.tsx",
+    "context": "ScrollProgress label for Service section"
+  },
+  "nav.section.process": {
+    "default": "Process",
+    "file": "app/routes/($locale)._index/route.tsx",
+    "context": "ScrollProgress label for Process section"
+  },
+  "nav.section.news": {
+    "default": "News",
+    "file": "app/routes/($locale)._index/route.tsx",
+    "context": "ScrollProgress label for News section"
+  },
+  "nav.section.clients": {
+    "default": "Clients",
+    "file": "app/routes/($locale)._index/route.tsx",
+    "context": "ScrollProgress label for Clients section"
+  },
+  "nav.section.ceo": {
+    "default": "CEO",
+    "file": "app/routes/($locale)._index/route.tsx",
+    "context": "ScrollProgress label for CEO section"
+  },
+  "nav.section.contact": {
+    "default": "Contact",
+    "file": "app/routes/($locale)._index/route.tsx",
+    "context": "ScrollProgress label for Contact section"
+  },
+
+  "service.title.selected": {
+    "default": "Selected",
+    "file": "app/routes/($locale)._index/service-section.tsx",
+    "context": "Part 1 of 'Selected works' heading"
+  },
+  "service.title.works": {
+    "default": "works",
+    "file": "app/routes/($locale)._index/service-section.tsx",
+    "context": "Part 2 of 'Selected works' heading (styled)"
+  },
+  "service.intro": {
+    "default": "Explore the impressive portfolio of Our 3D Rendering Company to see how VISUAL ENNODE brings architectural visions to life with precision and creativity. Dive into our projects to experience the high-quality visualizations that set us apart.",
+    "file": "app/routes/($locale)._index/service-section.tsx",
+    "context": "Intro paragraph under 'Selected works' heading"
+  },
+  "service.cta_explore_more": {
+    "default": "Explore more",
+    "file": "app/routes/($locale)._index/service-section.tsx",
+    "context": "CTA text for explore more (bottom of section)"
+  },
+  "alt.work_pattern": {
+    "default": "work-{n}",
+    "file": "app/routes/($locale)._index/service-section.tsx",
+    "context": "Pattern used for image alt attributes (consider replacing with translated alt)"
+  },
+
+  "summary.title.services": {
+    "default": "Services",
+    "file": "app/routes/($locale)._index/summary-section.tsx",
+    "context": "Left column heading in Summary section"
+  },
+  "summary.category.still_image": {
+    "default": "Still Image",
+    "file": "app/routes/($locale)._index/summary-section.tsx",
+    "context": "Category pill"
+  },
+  "summary.category.animation": {
+    "default": "Animation",
+    "file": "app/routes/($locale)._index/summary-section.tsx",
+    "context": "Category pill"
+  },
+  "summary.category.cinematic": {
+    "default": "Cinematic",
+    "file": "app/routes/($locale)._index/summary-section.tsx",
+    "context": "Category pill"
+  },
+  "summary.category.product": {
+    "default": "Product",
+    "file": "app/routes/($locale)._index/summary-section.tsx",
+    "context": "Category pill"
+  },
+  "summary.category.vfx": {
+    "default": "VFX",
+    "file": "app/routes/($locale)._index/summary-section.tsx",
+    "context": "Category pill"
+  },
+  "summary.alt.image_pattern": {
+    "default": "image-{n}",
+    "file": "app/routes/($locale)._index/summary-section.tsx",
+    "context": "Fallback alt text pattern for images"
+  }
+}

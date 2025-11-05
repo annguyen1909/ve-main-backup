@@ -1,0 +1,1 @@
+import{r as i}from"./jsx-runtime-kF-aRxYe.js";const r=768;function d(e){e=e??r;const[o,n]=i.useState(void 0);return i.useEffect(()=>{const t=window.matchMedia(`(max-width: ${e-1}px)`),s=()=>{n(window.innerWidth<e)};return t.addEventListener("change",s),n(window.innerWidth<e),()=>t.removeEventListener("change",s)},[]),!!o}export{d as u};

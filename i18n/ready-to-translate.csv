@@ -1,0 +1,35 @@
+key,default,file,context
+home.hero.visual_title,VISUAL,app/routes/($locale)._index/hero-section-backup.tsx,Left hero big heading (backup file)
+home.hero.ennode_title,ENNODE,app/routes/($locale)._index/hero-section-backup.tsx,Right hero big heading (backup file)
+home.hero.title,ARCHVIZ STUDIO,app/routes/($locale)._index/hero-section.tsx,Main hero H1 (two-line title)
+home.hero.subtitle,"We unite diverse diverse departments for seamless collaboration",app/routes/($locale)._index/hero-section.tsx,Hero lead paragraph (note: duplicated word 'diverse diverse')
+home.cta.we_visualize,WE VISUALIZE,app/routes/($locale)._index/hero-section.tsx,Small label above CTA (mobile and desktop)
+home.cta.see_works,SEE WORKS,app/routes/($locale)._index/hero-section.tsx,Primary CTA linking to works (mobile & desktop)
+home.cta.we_connect,WE CONNECT,app/routes/($locale)._index/hero-section.tsx,Small label above secondary CTA (mobile & desktop)
+home.cta.more_about_us,MORE ABOUT US,app/routes/($locale)._index/hero-section.tsx,Secondary CTA linking to about (mobile & desktop)
+news.title.part1,RELATED,app/routes/($locale)._index/news-section.tsx,News section title - first word
+news.title.part2,NEWS,app/routes/($locale)._index/news-section.tsx,News section title - second word (styled red)
+news.subtitle,Latest articles,app/routes/($locale)._index/news-section.tsx,Short subtitle under news title
+news.cta_go_to_news,"Go to news",app/routes/($locale)._index/news-section.tsx,Button/Link text to navigate to news index (bottom CTA)
+process.title.part1,OUR WORK,app/routes/($locale)._index/process-section.tsx,Process section title - first part
+process.title.part2,PROCESS,app/routes/($locale)._index/process-section.tsx,Process section title - second part (styled red)
+nav.section.hero,Hero,app/routes/($locale)._index/route.tsx,ScrollProgress label for Hero section
+nav.section.summary,Summary,app/routes/($locale)._index/route.tsx,ScrollProgress label for Summary section
+nav.section.service,Service,app/routes/($locale)._index/route.tsx,ScrollProgress label for Service section
+nav.section.process,Process,app/routes/($locale)._index/route.tsx,ScrollProgress label for Process section
+nav.section.news,News,app/routes/($locale)._index/route.tsx,ScrollProgress label for News section
+nav.section.clients,Clients,app/routes/($locale)._index/route.tsx,ScrollProgress label for Clients section
+nav.section.ceo,CEO,app/routes/($locale)._index/route.tsx,ScrollProgress label for CEO section
+nav.section.contact,Contact,app/routes/($locale)._index/route.tsx,ScrollProgress label for Contact section
+service.title.selected,Selected,app/routes/($locale)._index/service-section.tsx,Part 1 of 'Selected works' heading
+service.title.works,works,app/routes/($locale)._index/service-section.tsx,Part 2 of 'Selected works' heading (styled)
+service.intro,"Explore the impressive portfolio of Our 3D Rendering Company to see how VISUAL ENNODE brings architectural visions to life with precision and creativity. Dive into our projects to experience the high-quality visualizations that set us apart.",app/routes/($locale)._index/service-section.tsx,Intro paragraph under 'Selected works' heading
+service.cta_explore_more,"Explore more",app/routes/($locale)._index/service-section.tsx,CTA text for explore more (bottom of section)
+alt.work_pattern,"work-{n}",app/routes/($locale)._index/service-section.tsx,Pattern used for image alt attributes (consider replacing with translated alt)
+summary.title.services,Services,app/routes/($locale)._index/summary-section.tsx,Left column heading in Summary section
+summary.category.still_image,"Still Image",app/routes/($locale)._index/summary-section.tsx,Category pill
+summary.category.animation,Animation,app/routes/($locale)._index/summary-section.tsx,Category pill
+summary.category.cinematic,Cinematic,app/routes/($locale)._index/summary-section.tsx,Category pill
+summary.category.product,Product,app/routes/($locale)._index/summary-section.tsx,Category pill
+summary.category.vfx,VFX,app/routes/($locale)._index/summary-section.tsx,Category pill
+summary.alt.image_pattern,"image-{n}",app/routes/($locale)._index/summary-section.tsx,Fallback alt text pattern for images

@@ -1,0 +1,555 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  @apply bg-[#1B1B1B];
+
+  @media (prefers-color-scheme: dark) {
+    color-scheme: dark;
+  }
+}
+
+/* Hide native browser media control chrome (download/more buttons) when present.
+   We already use custom controls inside the app; hide vendor-specific pseudo elements
+   so the three-dot / download options do not appear. This targets WebKit/Chromium.
+*/
+
+@layer base {
+  @font-face {
+    font-family: Montserrat;
+    src: url("/fonts/Montserrat/Montserrat-VariableFont_wght.ttf");
+  }
+
+  @font-face {
+    font-family: Pretendard;
+    src: url("/fonts/Pretendard/variable/PretendardVariable.ttf");
+  }
+  @font-face {
+    font-family: Gilroy;
+    src: url("/fonts/Gilroy/Gilroy-Bold.ttf");
+  }
+  @font-face {
+    font-family: Paperlogy;
+    /* actual files in public/fonts/Paperlogy-1.001 use numbered suffixes;
+       point to the Regular file that exists in the repo */
+    src: url("/fonts/Paperlogy-1.001/Paperlogy-4Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: Gothic;
+    /* Prefer Gothic A1; include local name fallback and format + swap */
+    src: local("Gothic A1"), local("GothicA1-Regular"), url("/fonts/Gothic_A1/GothicA1-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: SpoqaHanSansNeo;
+    /* fix: directory name is "SpoqaHanSansNeo_TTF_original" (typo earlier) */
+    src: local("Spoqa Han Sans Neo"), local("SpoqaHanSansNeo-Regular"), url("/fonts/SpoqaHanSansNeo_all/SpoqaHanSansNeo_TTF_original/SpoqaHanSansNeo-Thin.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: Test2;
+    src: url("/fonts/Test2/Test2.ttf") format("truetype");
+  }
+
+  /* Nanum Barun Gothic (나눔바른고딕) - place your font files under
+     public/fonts/NanumBarunGothic/ with the Regular/Medium/Bold ttf files.
+     If the files aren't present the browser will fall back to the next fonts. */
+  @font-face {
+    font-family: "NanumBarunGothic";
+    src: local("Nanum Barun Gothic"), local("NanumBarunGothic-Regular"), url("/fonts/NanumBarunGothic/NanumFontSetup_TTF_BARUNGOTHIC/NanumBarunGothic.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* Four Hangul-only test fonts (use these to test which Korean font paints Hangul glyphs).
+     Each font-face uses unicode-range limited to Hangul blocks so the font will only be
+     applied for Korean characters; Latin and other scripts will fall back to the site's
+     normal fonts. Change --ko-font to switch among them (see instructions at the end).
+  */
+
+  @font-face {
+    font-family: "VeKoTest-GothicA1";
+    src: url("/fonts/Gothic_A1/GothicA1-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    /* Hangul ranges */
+    unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7AF, U+A960-A97F, U+D7B0-D7FF;
+  }
+
+  @font-face {
+    font-family: "VeKoTest-Spoqa";
+    src: url("/fonts/SpoqaHanSansNeo_all/SpoqaHanSansNeo_TTF_original/SpoqaHanSansNeo-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7AF, U+A960-A97F, U+D7B0-D7FF;
+  }
+
+  @font-face {
+    font-family: "VeKoTest-Paperlogy";
+    src: url("/fonts/Paperlogy-1.001/Paperlogy-4Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7AF, U+A960-A97F, U+D7B0-D7FF;
+  }
+
+  @font-face {
+    font-family: "VeKoTest-Pretendard";
+    src: url("/fonts/Pretendard/variable/PretendardVariable.ttf") format("truetype");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7AF, U+A960-A97F, U+D7B0-D7FF;
+  }
+
+  :root {
+    /* Figma exported color tokens (mapped) */
+    --color-white-solid: #ffffff;
+    --color-blue-3: #06070a;
+    --color-blue-4: #050411;
+    --color-blue-11: #17191f;
+    --color-blue-19: #2a2d38;
+    --color-blue-11-50: rgba(23, 25, 31, 0.5);
+    --color-black-solid: #000000;
+    --color-azure-38: #56616a;
+    --color-azure-48: #6d7687;
+    --color-azure-49: #637695;
+    --color-azure-70: #a4b0c2;
+    --color-azure-78: #bbc4d2;
+    --color-grey-56: #858e97;
+    --color-grey-94: #efedf0;
+    --color-grey-96: #f4f5f8;
+
+    /* spacing tokens */
+    --space-xs: 8px;
+    --space-s: 16px;
+    --space-12: 12px;
+    --space-22: 22px;
+    --space-33: 33px;
+    --space-39: 39px;
+    --space-44: 44px;
+
+    /* font sizes (px) */
+    --font-size-18: 18px;
+    --font-size-20: 20px;
+    --font-size-64: 64px;
+
+    /* stroke & weights */
+    --stroke-weight-1: 1;
+    --stroke-weight-2_5: 2.5;
+    --fw-500: 500;
+    --fw-800: 800;
+
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Default site font for non-Korean pages */
+    font-family: Montserrat, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  @container header (max-height: 680px) {
+    #header-footer {
+      @apply hidden;
+    }
+  }
+
+  /* removed .lock-scroll to ensure pages remain scrollable by default */
+
+  .link-animation {
+    padding-bottom: 0.1rem;
+    background: linear-gradient(currentColor 0 0) bottom left/
+      var(--underline-width, 0%) 0.05em no-repeat;
+    color: currentColor;
+    text-decoration: none;
+    transition: background-size 0.2s;
+  }
+
+  .link-animation:hover {
+    --underline-width: 100%;
+  }
+
+  .animate-spinner:first-child {
+    animation-delay: -1.2s;
+    transform: rotate(0.0001deg) translate(146%);
+  }
+
+  .animate-spinner:nth-child(2) {
+    animation-delay: -1.1s;
+    transform: rotate(30deg) translate(146%);
+  }
+
+  .animate-spinner:nth-child(3) {
+    animation-delay: -1s;
+    transform: rotate(60deg) translate(146%);
+  }
+
+  .animate-spinner:nth-child(4) {
+    animation-delay: -0.9s;
+    transform: rotate(90deg) translate(146%);
+  }
+
+  .animate-spinner:nth-child(5) {
+    animation-delay: -0.8s;
+    transform: rotate(120deg) translate(146%);
+  }
+
+  .animate-spinner:nth-child(6) {
+    animation-delay: -0.7s;
+    transform: rotate(150deg) translate(146%);
+  }
+
+  .animate-spinner:nth-child(7) {
+    animation-delay: -0.6s;
+    transform: rotate(180deg) translate(146%);
+  }
+
+  .animate-spinner:nth-child(8) {
+    animation-delay: -0.5s;
+    transform: rotate(210deg) translate(146%);
+  }
+
+  .animate-spinner:nth-child(9) {
+    animation-delay: -0.4s;
+    transform: rotate(240deg) translate(146%);
+  }
+
+  .animate-spinner:nth-child(10) {
+    animation-delay: -0.3s;
+    transform: rotate(270deg) translate(146%);
+  }
+
+  .animate-spinner:nth-child(11) {
+    animation-delay: -0.2s;
+    transform: rotate(300deg) translate(146%);
+  }
+
+  .animate-spinner:nth-child(12) {
+    animation-delay: -0.1s;
+    transform: rotate(330deg) translate(146%);
+  }
+
+  .TooltipContent {
+    animation-duration: 3000ms;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+  }
+
+  .TooltipContent[data-state="delayed-open"][data-side="top"] {
+    animation-name: slideDownAndFade;
+  }
+
+  .TooltipContent[data-state="delayed-open"][data-side="bottom"] {
+    animation-name: slideUpAndFade;
+  }
+
+  .TooltipContent[data-state="instant-open"][data-side="top"] {
+    animation-name: slideDownAndFade;
+  }
+
+  .TooltipContent[data-state="instant-open"][data-side="bottom"] {
+    animation-name: slideUpAndFade;
+  }
+
+  @keyframes slideUpAndFade {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideDownAndFade {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-outline {
+    /* use a CSS variable so stroke width can be overridden per-label */
+    -webkit-text-stroke-width: 0.5px;
+    -webkit-text-stroke-color: white; /* Default outline color */
+    /* Add optional text-fill-color for better cross-browser support */
+    -webkit-text-fill-color: transparent;
+  }
+  /* When the text is inside a hovered group, fill the text smoothly to the group's color */
+  .group:hover .text-outline {
+    -webkit-text-fill-color: currentColor;
+    -webkit-text-stroke-color: currentColor;
+    transition-duration: 400ms;
+    transition-timing-function: ease;
+  }
+  .text-outline-dark {
+    /* use a CSS variable so stroke width can be overridden per-label */
+    -webkit-text-stroke-width: 0.75px;
+    -webkit-text-stroke-color: black; /* Default outline color */
+    /* Add optional text-fill-color for better cross-browser support */
+    -webkit-text-fill-color: transparent;
+  }
+  /* When the text is inside a hovered group, fill the text smoothly to the group's color */
+  .group:hover .text-outline-dark {
+    -webkit-text-fill-color: currentColor;
+    -webkit-text-stroke-color: currentColor;
+    transition-duration: 400ms;
+    transition-timing-function: ease;
+  }
+}
+
+/* Loader styles moved from component (text + image variants). */
+.loader {
+  width: fit-content;
+  font-size: 40px;
+  font-family: monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #0000;
+  -webkit-text-stroke: 1px #000;
+  --g: conic-gradient(#000 0 0) no-repeat;
+  background: var(--g) 0, var(--g) 1ch, var(--g) 2ch, var(--g) 3ch, var(--g) 4ch, var(--g) 5ch, var(--g) 6ch;
+  animation: l18-0 2s linear infinite alternate, l18-1 4s linear infinite;
+}
+.loader:before {
+  content: "Loading";
+}
+
+/* Image mask variant: apply to an IMG element to reveal the image in columns.
+   Usage: <div class="loader-image"><img src="/path/to/img.jpg" class="loader-image__img"/></div>
+*/
+.loader-image {
+  display: inline-block;
+  position: relative;
+}
+.loader-image__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  --g: conic-gradient(#000 0 0) no-repeat;
+  -webkit-mask-image: var(--g), var(--g), var(--g), var(--g), var(--g), var(--g), var(--g);
+  mask-image: var(--g), var(--g), var(--g), var(--g), var(--g), var(--g), var(--g);
+  -webkit-mask-position: 0 0, 1ch 0, 2ch 0, 3ch 0, 4ch 0, 5ch 0, 6ch 0;
+  mask-position: 0 0, 1ch 0, 2ch 0, 3ch 0, 4ch 0, 5ch 0, 6ch 0;
+  -webkit-mask-size: 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0;
+  mask-size: 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: l18-0 2s linear infinite alternate, l18-1 4s linear infinite;
+}
+
+/* Background-image variant for better mask support across browsers. Apply
+   `background-image: url(...)` inline or via a utility and add the class
+   `loader-image__bg` to enable the mask-based reveal. */
+.loader-image__bg {
+  --g: conic-gradient(#000 0 0) no-repeat;
+  -webkit-mask-image: var(--g), var(--g), var(--g), var(--g), var(--g), var(--g), var(--g);
+  mask-image: var(--g), var(--g), var(--g), var(--g), var(--g), var(--g), var(--g);
+  -webkit-mask-position: 0 0, 1ch 0, 2ch 0, 3ch 0, 4ch 0, 5ch 0, 6ch 0;
+  mask-position: 0 0, 1ch 0, 2ch 0, 3ch 0, 4ch 0, 5ch 0, 6ch 0;
+  -webkit-mask-size: 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0;
+  mask-size: 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0, 1ch 0;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: l18-0 2s linear infinite alternate, l18-1 4s linear infinite;
+}
+
+/* Column overlay reveal (fallback to mask). More reliable across browsers. */
+.loader-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+}
+.loader-overlay__col {
+  flex: 1 1 0;
+  background-color: hsl(var(--background));
+  transform: translateY(0%);
+  animation: reveal-col 2s ease-in-out infinite alternate;
+}
+.loader-overlay__col:nth-child(1) { animation-delay: 0s; }
+.loader-overlay__col:nth-child(2) { animation-delay: 0.12s; }
+.loader-overlay__col:nth-child(3) { animation-delay: 0.24s; }
+.loader-overlay__col:nth-child(4) { animation-delay: 0.36s; }
+.loader-overlay__col:nth-child(5) { animation-delay: 0.48s; }
+.loader-overlay__col:nth-child(6) { animation-delay: 0.6s; }
+.loader-overlay__col:nth-child(7) { animation-delay: 0.72s; }
+
+@keyframes reveal-col {
+  from { transform: translateY(0%); }
+  to   { transform: translateY(-100%); }
+}
+
+@keyframes l18-0 {
+  0%     {-webkit-mask-size: 1ch 0   ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0; mask-size: 1ch 0   ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0}
+  14.28% {-webkit-mask-size: 1ch 100%,1ch 50% ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0  ; mask-size: 1ch 100%,1ch 50% ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0}
+  28.57% {-webkit-mask-size: 1ch 100%,1ch 100%,1ch 50% ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0  ; mask-size: 1ch 100%,1ch 100%,1ch 50% ,1ch 0   ,1ch 0   ,1ch 0   ,1ch 0}
+  42.85% {-webkit-mask-size: 1ch 100%,1ch 100%,1ch 100%,1ch 50% ,1ch 0   ,1ch 0   ,1ch 0  ; mask-size: 1ch 100%,1ch 100%,1ch 100%,1ch 50% ,1ch 0   ,1ch 0   ,1ch 0}
+  57.14% {-webkit-mask-size: 1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 50% ,1ch 0   ,1ch 0  ; mask-size: 1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 50% ,1ch 0   ,1ch 0}
+  71.43% {-webkit-mask-size: 1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 50% ,1ch 0  ; mask-size: 1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 50% ,1ch 0}
+  85.71% {-webkit-mask-size: 1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 50% ; mask-size: 1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 50%}
+  100%   {-webkit-mask-size: 1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%; mask-size: 1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%,1ch 100%}
+}
+@keyframes l18-1 {
+  0%,50%    {-webkit-mask-position-y: 100%; mask-position-y: 100%}
+  50.01%,to {-webkit-mask-position-y: 0   ; mask-position-y: 0}
+}
+
+/* Homepage helper: ensure Hangul (Korean) characters render with a single
+   selected Hangul-capable webfont while leaving Latin text to the site's
+   normal display fonts. The individual @font-face rules above are restricted
+   to Hangul unicode ranges so each test font will only be used for Korean
+   characters.
+
+   Switch fonts by changing the CSS variable `--ko-font` (default set in :root).
+   Example in the console to switch to Spoqa:
+     document.documentElement.style.setProperty('--ko-font', '"VeKoTest-Spoqa"')
+*/
+.ko-solid {
+  font-family: SpoqaHanSansNeo, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+  /* Force a Korean-friendly font stack for pages served with lang=ko.
+     This ensures Montserrat (the default 'sans') is not applied to Hangul-heavy
+     pages — the HTML lang attribute is set in `app/root.tsx`. */
+  html[lang="ko"], body[lang="ko"] {
+    font-family: SpoqaHanSansNeo, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+/* Global parallax helpers */
+:root {
+  --pointer-x: 0;
+  --pointer-y: 0;
+  --scroll-y: 0;
+}
+
+.global-cursor {
+  transform: translate3d(var(--pointer-x), var(--pointer-y), 0)
+    translate(-50%, -50%);
+  /* remove heavy backdrop-blur and blending used originally to reduce paint cost */
+  border-color: rgba(180, 180, 180, 0.6);
+  background: transparent;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* Usage: add .parallax and data-parallax-speed to elements. Speed is a multiplier: positive moves with pointer, negative moves opposite */
+.parallax {
+  /* Use normalized pointer values (-1..1) to compute movement based on viewport size */
+  transform: translate3d(
+      calc(var(--pointer-norm-x) * 50vw * var(--parallax-speed, 0.02)),
+      calc(var(--pointer-norm-y) * 50vh * var(--parallax-speed, 0.02)),
+      0
+    )
+    translateZ(0);
+}
+
+/* Use data attribute directly in markup to set --parallax-speed inline when needed, e.g. data-parallax-speed="0.04" */
+
+/* Scroll parallax helper: elements that opt-in with data-parallax-scroll will get a translateY applied by the JS code */
+[data-parallax-scroll] {
+  transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}

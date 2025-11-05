@@ -1,0 +1,6 @@
+{
+  "name": "visualennode-devtools",
+  "version": "1.0.0",
+  "description": "Static probe file to satisfy Chrome DevTools requests in dev",
+  "probe": true
+}
