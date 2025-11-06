@@ -1,5 +1,5 @@
 import { Link, useOutletContext } from "@remix-run/react";
-import { localePath } from "~/lib/utils";
+import { localePath, montserratIfKo } from "~/lib/utils";
 import { AppContext } from "~/root";
 
 export function ContactCtaSection(props: {
@@ -20,11 +20,11 @@ export function ContactCtaSection(props: {
         <div className="font-extralight text-sm sm:text-base leading-7">
           <p data-koreanable>{t["component.contact.column_1.body"]}</p>
           <p className="mt-2">
-            <span data-koreanable>{t["HR manager"]}</span>: jobs@visualennode.com
+            <span data-koreanable className={montserratIfKo(t["HR manager"] as string, locale)}>{t["HR manager"]}</span>: <span className={montserratIfKo("jobs@visualennode.com", locale)}>jobs@visualennode.com</span>
           </p>
           <div className="mt-2 flex items-center gap-5">
             <p>
-              <span data-koreanable>{t["Phone"]}</span>: 02-515-7400
+              <span data-koreanable className={montserratIfKo(t["Phone"] as string, locale)}>{t["Phone"]}</span>: <span className={montserratIfKo("02-515-7400", locale)}>02-515-7400</span>
             </p>
 
             <div className="flex items-center gap-2 ml-auto">
@@ -102,7 +102,7 @@ export function ContactCtaSection(props: {
             <span data-koreanable>{t["component.contact.column_2.cta"]}</span>:{" "}
             <Link
               to={localePath(locale, "career")}
-              className="font-semibold"
+              className={`font-semibold ${montserratIfKo(t["Career"] as string, locale)}`}
               prefetch="intent"
             >
               {t["Career"]}
@@ -117,40 +117,40 @@ export function ContactCtaSection(props: {
         <div className="font-extralight text-sm sm:text-base leading-7">
           <div className="grid grid-cols-2 w-56 space-y-1">
             <div>
-              <Link to={localePath(locale, "")} className="link-animation">
+              <Link to={localePath(locale, "")} className={`link-animation ${montserratIfKo(t["Home"] as string, locale)}`}>
                 {t["Home"]}
               </Link>
             </div>
             <div>
               <Link
                 to={localePath(locale, "career")}
-                className="link-animation"
+                className={`link-animation ${montserratIfKo(t["Career"] as string, locale)}`}
               >
                 {t["Career"]}
               </Link>
             </div>
             <div>
-              <Link to={localePath(locale, "works")} className="link-animation">
+              <Link to={localePath(locale, "works")} className={`link-animation ${montserratIfKo(t["Works"] as string, locale)}`}>
                 {t["Works"]}
               </Link>
             </div>
             <div>
               <Link
                 to={localePath(locale, "contact")}
-                className="link-animation"
+                className={`link-animation ${montserratIfKo(t["Contact us"] as string, locale)}`}
               >
                 {t["Contact us"]}
               </Link>
             </div>
             <div>
-              <Link to={localePath(locale, "about")} className="link-animation">
+              <Link to={localePath(locale, "about")} className={`link-animation ${montserratIfKo(t["About us"] as string, locale)}`}>
                 {t["About us"]}
               </Link>
             </div>
             <div>
               <Link
                 to={localePath(locale, "privacy")}
-                className="link-animation"
+                className={`link-animation ${montserratIfKo(t["Privacy policy"] as string, locale)}`}
               >
                 {t["Privacy policy"]}
               </Link>

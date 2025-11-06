@@ -4,7 +4,7 @@ import { Container } from "~/components/ui/container"
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react"
 import { useInView } from "motion/react"
 import { NewsResource } from "~/types/news"
-import { localePath } from "~/lib/utils"
+import { localePath, montserratIfKo } from "~/lib/utils"
 
 interface NewsSectionProps {
   newsList: Array<NewsResource>,
@@ -45,22 +45,15 @@ const NewsSection = forwardRef<HTMLElement, NewsSectionProps>((props, forwardedR
             <div className="flex flex-col sm:flex-row items-start sm:items-baseline justify-between gap-4 sm:gap-6">
               <div>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight">
-                  {locale === 'ko' ? (
-                    <>
-                      <span className="">RELATED </span>
-                      <span className="text-red-500">NEWS</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="">{'RELATED'} </span>
-                      <span className=" text-red-500">{(t as Record<string,string>)["NEWS"] ?? 'NEWS'}</span>
-                    </>
-                  )}
+                  <>
+                    <span className={locale === 'ko' ? 'montserrat-for-en' : ''}>RELATED </span>
+                    <span className={(locale === 'ko' ? 'montserrat-for-en ' : '') + 'text-red-500'}>{(t as Record<string,string>)["NEWS"] ?? 'NEWS'}</span>
+                  </>
                 </h2>
-                <p className="text-base sm:text-lg text-white/60 mt-2 sm:mt-3">{(t as Record<string,string>)["New update"] ?? 'Latest articles'}</p>
+                <p className={`text-base sm:text-lg text-white/60 mt-2 sm:mt-3 ${montserratIfKo((t as Record<string,string>)["New update"] ?? 'Latest articles', locale)}`}>{(t as Record<string,string>)["New update"] ?? 'Latest articles'}</p>
               </div>
               {props.newsCount > 4 && (
-                <Link to={localePath(locale, 'news')} className="text-xs sm:text-sm text-white/70 hover:text-white transition whitespace-nowrap">{(t as Record<string,string>)['See more'] ?? 'See more'} ({props.newsCount})</Link>
+                <Link to={localePath(locale, 'news')} className={`text-xs sm:text-sm text-white/70 hover:text-white transition whitespace-nowrap ${montserratIfKo((t as Record<string,string>)['See more'] ?? 'See more', locale)}`}>{(t as Record<string,string>)['See more'] ?? 'See more'} ({props.newsCount})</Link>
               )}
             </div>
           </div>
@@ -92,7 +85,7 @@ const NewsSection = forwardRef<HTMLElement, NewsSectionProps>((props, forwardedR
 
           {/* Go to news button */}
           <div className="mt-4 sm:mt-5 lg:mt-6 flex justify-center">
-            <Link to={localePath(locale, 'news')} className="px-6 py-2 sm:py-3 bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/30 rounded-full text-white uppercase text-xs sm:text-sm tracking-wide transition-all duration-300">
+            <Link to={localePath(locale, 'news')} className={`px-6 py-2 sm:py-3 bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/30 rounded-full text-white uppercase text-xs sm:text-sm tracking-wide transition-all duration-300 ${montserratIfKo(getT('Go to news'), locale)}`}>
               {getT('Go to news')}
             </Link>
           </div>

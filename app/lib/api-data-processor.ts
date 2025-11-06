@@ -23,6 +23,62 @@ export interface OrganizedProject {
   totalImages: number;
 }
 
+// Get priority order for custom project sorting
+function getProjectPriority(projectTitle: string): number | null {
+  const priorityOrder: Record<string, number> = {
+    'Battery Warehouse': 1,
+    'Solar Panel Balcony': 2,
+    'Parking lot': 3,
+    'Warm house': 4,
+    'Takaho Brand Showroom': 5,
+    'Basement': 6, // This covers both Basement and Basement Renovation
+    'Post Office': 7,
+    'Commercial Building': 8,
+    'Evergreen Nursing Hospital': 9,
+    'Office Center': 10,
+    'Party Club': 11,
+    'Complex Apartment': 12,
+    'Gyeonggi-do 00 Jugong Apartment Reconstruction': 13,
+    'S-Factory': 14,
+    'Etispace House': 15,
+    'MOA Town Plan (Gireum-dong, Seongbuk-gu)': 16,
+    'MOA Town Plan (Samseon-dong, Seongbuk-gu)': 17,
+    'RIV Office': 18,
+    'Police Office': 19,
+    'Yeosu Expo': 20,
+    'Office Building': 21,
+    'Osan-si, Gyeonggi-do Apartment plan in': 22,
+    'Daemyoung Energy Battery Plant': 23,
+    'Geoje Island Café': 24,
+    'T.K E&C Aerial View': 25,
+    'Wedding Hall Renovation': 26
+  };
+
+  // Check for exact match first
+  if (priorityOrder[projectTitle]) {
+    return priorityOrder[projectTitle];
+  }
+
+  // Check for partial matches for complex names
+  for (const [priorityTitle, priority] of Object.entries(priorityOrder)) {
+    if (projectTitle.includes(priorityTitle) || priorityTitle.includes(projectTitle)) {
+      return priority;
+    }
+  }
+
+  // Special handling for basement projects (combines Basement and Basement Renovation)
+  if (projectTitle.toLowerCase().includes('basement')) {
+    return priorityOrder['Basement'];
+  }
+
+  // Special handling for Daemyoung Energy projects
+  if (projectTitle.toLowerCase().includes('daemyoung energy')) {
+    return priorityOrder['Daemyoung Energy Battery Plant'];
+  }
+
+  return null; // No priority assigned
+}
+
 // Group works by project name (removing duplicate variations)
 export function groupWorksByProject(works: WorkResource[]): OrganizedProject[] {
   const projectMap = new Map<string, WorkResource[]>();
@@ -90,8 +146,23 @@ export function groupWorksByProject(works: WorkResource[]): OrganizedProject[] {
     organizedProjectsWithKey.push({ project: projectObj, key: representativeKey });
   });
 
-  // Sort projects by representative key (slug/ID) alphabetically (A → Z)
-  organizedProjectsWithKey.sort((a, b) => a.key.localeCompare(b.key, undefined, { sensitivity: 'base' }));
+  // Sort projects by custom priority order
+  organizedProjectsWithKey.sort((a, b) => {
+    const priorityA = getProjectPriority(a.project.title);
+    const priorityB = getProjectPriority(b.project.title);
+    
+    // If both have priority, sort by priority number
+    if (priorityA !== null && priorityB !== null) {
+      return priorityA - priorityB;
+    }
+    
+    // If only one has priority, prioritized one comes first
+    if (priorityA !== null && priorityB === null) return -1;
+    if (priorityA === null && priorityB !== null) return 1;
+    
+    // If neither has priority, sort alphabetically
+    return a.project.title.localeCompare(b.project.title, undefined, { sensitivity: 'base' });
+  });
 
   return organizedProjectsWithKey.map((p) => p.project);
 }
@@ -117,7 +188,7 @@ function normalizeProjectTitle(title: string): string {
     'Wedding Hall Renovation': 'Wedding Hall Renovation',
     'T.K E&C Aerial View': 'T.K E&C Aerial View',
     'Geoje Island Café': 'Geoje Island Café',
-    'Daemyoung Energy': 'Daemyoung Energy',
+    'Daemyoung Energy Battery Plant': 'Daemyoung Energy Battery Plant',
     'RIV Office': 'RIV Office',
     'Office Center': 'Office Center',
     'Solar Panel Balcony': 'Solar Panel Balcony',
@@ -125,7 +196,22 @@ function normalizeProjectTitle(title: string): string {
     'Ino Block': 'Ino Block',
     'Complex apartment': 'Complex Apartment',
     'Osan apartment': 'Osan Apartment',
-    'S-Factory': 'S-Factory'
+    'Osan-si, Gyeonggi-do Apartment plan in': 'Osan-si, Gyeonggi-do Apartment plan in',
+    'S-Factory': 'S-Factory',
+    'Battery Warehouse': 'Battery Warehouse',
+    'Parking lot': 'Parking lot',
+    'Warm house': 'Warm house',
+    'Takaho Brand Showroom': 'Takaho Brand Showroom',
+    'Basement': 'Basement',
+    'Basement Renovation': 'Basement',
+    'Post Office': 'Post Office',
+    'Commercial Building': 'Commercial Building',
+    'Evergreen Nursing Hospital': 'Evergreen Nursing Hospital',
+    'Party Club': 'Party Club',
+    'Etispace House': 'Etispace House',
+    'Police Office': 'Police Office',
+    'Yeosu Expo': 'Yeosu Expo',
+    'Office Building': 'Office Building'
   };
 
   return specialCases[normalized] || normalized;

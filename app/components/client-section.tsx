@@ -36,7 +36,7 @@ const ClientSection = forwardRef<HTMLElement, ClientSectionProps>(
         <Container className="flex-none m-auto min-h-full flex flex-col w-full px-4 sm:px-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:mt-14 mb-4 sm:mb-6">
             <div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight uppercase">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight uppercase text-center">
               {/**
                * Render translation with `||` markers used to indicate highlighted segments.
                * Example in common.json: "Our team is dedicated to building ||strong, longlasting relationships|| with our partners." 
@@ -72,6 +72,10 @@ const ClientSection = forwardRef<HTMLElement, ClientSectionProps>(
                 return raw;
               })()}
             </h2>
+            {/* Optional subtitle under the main title. Add a translation key `component.client.subtitle` if you want text here. */}
+            <h3 id="client-subtitle" data-testid="client-subtitle" className="mt-4 text-lg sm:text-xl text-white/80 font-normal">
+              {String(t["component.client.subtitle"] ?? "Client subtitle")}
+            </h3>
             </div>
           </div>
 

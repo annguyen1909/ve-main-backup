@@ -39,20 +39,20 @@ export const defaultItems: WorkProcessItem[] = [
 export const localizedItems: Record<string, WorkProcessItem[]> = {
   ko: [
     {
-      title: "예산 상담",
-      subtitles: ["예산 및 일정 상담", "계약서 서명 및 결제"],
+      title: "작업 의뢰",
+      subtitles: ["예산 및 일정 상담", "장면 및 구도 / 범위 상담"],
     },
     {
-      title: "기획 및 작업",
-      subtitles: ["3D 작업 및 프로젝트 계획 시작"],
+      title: "작업 기획",
+      subtitles: ["프로젝트 컨셉 기획, 3D 작업"],
     },
     {
-      title: "초안 및 수정",
-      subtitles: ["첫 번째 초안 전달", "두 번째 초안 전달", "최종 고해상도 이미지 전달"],
+      title: "시안 공유 및 수정",
+      subtitles: ["1차 시안 전달", "2차 시안 전달", "최종 고해상도 이미지 전달"],
     },
     {
-      title: "최종 검수",
-      subtitles: ["계약 종료", "뷰락 / 이미지 범위 상담", "최종 결제 송금 / 라이선스 이전"],
+      title: "최종 검토 및 납품",
+      subtitles: ["최종 검토", "최종 결제 및 라이선스 이전"],
     },
   ],
 };

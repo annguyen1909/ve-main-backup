@@ -1,0 +1,1 @@
+import{j as t}from"./jsx-runtime-kF-aRxYe.js";import{T as o}from"./team-section-CkguuTle.js";import{a}from"./i18n-DH-wL5Eu.js";import"./container-2TlAo-hG.js";import"./utils-tQ8evKDJ.js";import"./carousel-9jwcCCO4.js";function f(){const{teams:r}=a();return t.jsx(o,{teams:r})}export{f as default};

@@ -35,3 +35,12 @@ export function localePath(locale: string, to: string) {
 
   return path.replace(/\/$/g, '').replace('//', '');
 }
+
+/**
+ * Returns 'montserrat-for-en' class if locale is Korean and text contains English letters.
+ * Use this to ensure English words render with Montserrat font on Korean pages.
+ */
+export function montserratIfKo(text: string | null | undefined, locale: string | undefined): string {
+  if (!text || !locale || locale !== 'ko') return '';
+  return /[A-Za-z]/.test(text) ? 'montserrat-for-en' : '';
+}

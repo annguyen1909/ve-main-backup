@@ -32,7 +32,7 @@ declare global {
 }
 import { toast } from "sonner";
 import type { loader as rootLoader } from "~/root";
-import { cn, title, localePath } from "~/lib/utils";
+import { cn, title, localePath, montserratIfKo } from "~/lib/utils";
 import { SpinnerIcon } from "~/components/ui/icon";
 import { useIsMobile } from "~/components/hooks/use-mobile";
 
@@ -280,7 +280,7 @@ export default function Contact() {
             {/* We dynamically load the lottie-player script client-side and mount the element into a container. */}
             <LottieThankYou />
 
-            <h2 className="text-white font-extrabold text-4xl md:text-6xl tracking-tight mb-4">
+            <h2 className={`text-white font-extrabold text-4xl md:text-6xl tracking-tight mb-4 ${montserratIfKo("THANK YOU", locale)}`}>
               THANK YOU
             </h2>
 
@@ -293,7 +293,7 @@ export default function Contact() {
 
             <Link
               to={localePath(locale, "index")}
-              className="px-4 py-2 bg-white text-[#1b1b1b] rounded-none text-xs font-semibold"
+              className={`px-4 py-2 bg-white text-[#1b1b1b] rounded-none text-xs font-semibold ${montserratIfKo("BACK TO HOME", locale)}`}
             >
               BACK TO HOME
             </Link>
@@ -330,16 +330,16 @@ export default function Contact() {
 
                     <div className="flex flex-col gap-7">
                       <div>
-                        <p className="font-extralight text-xl">
+                        <p className={`font-extralight text-xl ${montserratIfKo(t["Hotline"], locale)}`}>
                           {t["Hotline"]}
                         </p>
-                        <p className="font-extralight text-base">
+                        <p className={`font-extralight text-base ${montserratIfKo("+82 2 515 7400", locale)}`}>
                           +82 2 515 7400
                         </p>
                       </div>
 
                       <div>
-                        <p className="font-extralight text-xl">
+                        <p className={`font-extralight text-xl ${montserratIfKo((t as never)["Email"], locale)}`}>
                           {(t as never)["Email"]}
                         </p>
                         <p className="font-extralight text-base font-sans">
@@ -348,10 +348,10 @@ export default function Contact() {
                       </div>
 
                       <div>
-                        <p className="font-extralight text-xl">
+                        <p className={`font-extralight text-xl ${montserratIfKo(t["Kakaotalk"], locale)}`}>
                           {t["Kakaotalk"]}
                         </p>
-                        <p className="font-extralight text-base font-sans">
+                        <p className={`font-extralight text-base font-sans ${montserratIfKo("visualennode", locale)}`}>
                           <a
                             href="https://pf.kakao.com/_ggesn/chat"
                             target="_blank"
@@ -364,7 +364,7 @@ export default function Contact() {
                       </div>
 
                       <div>
-                        <p className="font-extralight text-xl">
+                        <p className={`font-extralight text-xl ${montserratIfKo(t["Whatsapp"], locale)}`}>
                           {t["Whatsapp"]}
                         </p>
                         <p className="font-extralight text-base font-sans">
@@ -380,10 +380,10 @@ export default function Contact() {
                       </div>
 
                       <div>
-                        <p className="font-extralight text-xl">
+                        <p className={`font-extralight text-xl ${montserratIfKo(t["Instagram"], locale)}`}>
                           {t["Instagram"]}
                         </p>
-                        <p className="font-extralight text-base font-sans">
+                        <p className={`font-extralight text-base font-sans ${montserratIfKo("visual_ennode", locale)}`}>
                           <a
                             href="https://www.instagram.com/visual_ennode"
                             target="_blank"
@@ -396,10 +396,10 @@ export default function Contact() {
                       </div>
 
                       <div>
-                        <p className="font-extralight text-xl">
+                        <p className={`font-extralight text-xl ${montserratIfKo(t["Youtube"], locale)}`}>
                           {t["Youtube"]}
                         </p>
-                        <p className="font-extralight text-base font-sans">
+                        <p className={`font-extralight text-base font-sans ${montserratIfKo("visual_ennode", locale)}`}>
                           <a
                             href="https://www.youtube.com/@visualennode"
                             target="_blank"
@@ -554,10 +554,10 @@ export default function Contact() {
                         className="size-10 sm:size-16"
                       />
                     </div>
-                    <span className="font-medium text-lg sm:text-2xl text-[#c3c3c3]">
+                    <span className={`font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(t["Hotline"], locale)}`}>
                       {t["Hotline"]}
                     </span>
-                    <span className="font-light text-sm sm:text-lg text-[#c3c3c3]">
+                    <span className={`font-light text-sm sm:text-lg text-[#c3c3c3] ${montserratIfKo("+82 2 515 7400", locale)}`}>
                       +82 2 515 7400
                     </span>
                   </Link>
@@ -572,10 +572,10 @@ export default function Contact() {
                         className="size-10 sm:size-16"
                       />
                     </div>
-                    <span className="font-medium text-lg sm:text-2xl text-[#c3c3c3]">
+                    <span className={`font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(emailLabel, locale)}`}>
                       {emailLabel}
                     </span>
-                    <span className="font-light text-sm sm:text-lg text-[#c3c3c3] font-sans">
+                    <span className={`font-light text-sm sm:text-lg text-[#c3c3c3] font-sans ${montserratIfKo("contact@visualennode.com", locale)}`}>
                       contact@visualennode.com
                     </span>
                   </Link>
@@ -592,10 +592,10 @@ export default function Contact() {
                         className="size-10 sm:size-16"
                       />
                     </div>
-                    <span className="font-medium text-lg sm:text-2xl text-[#c3c3c3]">
+                    <span className={`font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(t["Kakaotalk"], locale)}`}>
                       {t["Kakaotalk"]}
                     </span>
-                    <span className="font-light text-sm sm:text-lg text-[#c3c3c3] font-sans">
+                    <span className={`font-light text-sm sm:text-lg text-[#c3c3c3] font-sans ${montserratIfKo("visualennode", locale)}`}>
                       visualennode
                     </span>
                   </Link>
@@ -612,10 +612,10 @@ export default function Contact() {
                         className="size-10 sm:size-16"
                       />
                     </div>
-                    <span className="font-medium text-lg sm:text-2xl text-[#c3c3c3]">
+                    <span className={`font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(t["Whatsapp"], locale)}`}>
                       {t["Whatsapp"]}
                     </span>
-                    <span className="font-light text-sm sm:text-lg text-[#c3c3c3] font-sans">
+                    <span className={`font-light text-sm sm:text-lg text-[#c3c3c3] font-sans ${montserratIfKo("+82 2 515 7400", locale)}`}>
                       +82 2 515 7400
                     </span>
                   </Link>
@@ -632,10 +632,10 @@ export default function Contact() {
                         className="size-10 sm:size-16"
                       />
                     </div>
-                    <span className="font-medium text-lg sm:text-2xl text-[#c3c3c3]">
+                    <span className={`font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(t["Instagram"], locale)}`}>
                       {t["Instagram"]}
                     </span>
-                    <span className="font-light text-sm sm:text-lg text-[#c3c3c3] font-sans">
+                    <span className={`font-light text-sm sm:text-lg text-[#c3c3c3] font-sans ${montserratIfKo("visual_ennode", locale)}`}>
                       visual_ennode
                     </span>
                   </Link>
@@ -652,10 +652,10 @@ export default function Contact() {
                         className="size-10 sm:size-16"
                       />
                     </div>
-                    <span className="font-medium text-lg sm:text-2xl text-[#c3c3c3]">
+                    <span className={`font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(t["Youtube"], locale)}`}>
                       {t["Youtube"]}
                     </span>
-                    <span className="font-light text-sm sm:text-lg text-[#c3c3c3] font-sans">
+                    <span className={`font-light text-sm sm:text-lg text-[#c3c3c3] font-sans ${montserratIfKo("visual_ennode", locale)}`}>
                       visual_ennode
                     </span>
                   </Link>
@@ -692,26 +692,26 @@ export default function Contact() {
 
                     <div className="flex flex-col gap-7">
                       <div>
-                        <p className="font-extralight text-xl">
+                        <p className={`font-extralight text-xl ${montserratIfKo(t["Hotline"], locale)}`}>
                           {t["Hotline"]}
                         </p>
-                        <p className="font-extralight text-base font-sans">
+                        <p className={`font-extralight text-base font-sans ${montserratIfKo("+82 2 515 7400", locale)}`}>
                           +82 2 515 7400
                         </p>
                       </div>
 
                       <div>
-                        <p className="font-extralight text-xl">{emailLabel}</p>
-                        <p className="font-extralight text-base font-sans">
+                        <p className={`font-extralight text-xl ${montserratIfKo(emailLabel, locale)}`}>{emailLabel}</p>
+                        <p className={`font-extralight text-base font-sans ${montserratIfKo("contact@visualennode.com", locale)}`}>
                           contact@visualennode.com
                         </p>
                       </div>
 
                       <div>
-                        <p className="font-extralight text-xl">
+                        <p className={`font-extralight text-xl ${montserratIfKo(t["Kakaotalk"], locale)}`}>
                           {t["Kakaotalk"]}
                         </p>
-                        <p className="font-extralight text-base">
+                        <p className={`font-extralight text-base ${montserratIfKo("visualennode", locale)}`}>
                           <a
                             href="https://pf.kakao.com/_ggesn/chat"
                             target="_blank"
@@ -724,10 +724,10 @@ export default function Contact() {
                       </div>
 
                       <div>
-                        <p className="font-extralight text-xl">
+                        <p className={`font-extralight text-xl ${montserratIfKo(t["Whatsapp"], locale)}`}>
                           {t["Whatsapp"]}
                         </p>
-                        <p className="font-extralight text-base">
+                        <p className={`font-extralight text-base ${montserratIfKo("+82 2 515 7400", locale)}`}>
                           <a
                             href="https://wa.me/message/UPCT3MQH3LGSF1"
                             target="_blank"
@@ -740,10 +740,10 @@ export default function Contact() {
                       </div>
 
                       <div>
-                        <p className="font-extralight text-xl">
+                        <p className={`font-extralight text-xl ${montserratIfKo(t["Instagram"], locale)}`}>
                           {t["Instagram"]}
                         </p>
-                        <p className="font-extralight text-base">
+                        <p className={`font-extralight text-base ${montserratIfKo("visual_ennode", locale)}`}>
                           <a
                             href="https://www.instagram.com/visual_ennode"
                             target="_blank"
@@ -756,10 +756,10 @@ export default function Contact() {
                       </div>
 
                       <div>
-                        <p className="font-extralight text-xl">
+                        <p className={`font-extralight text-xl ${montserratIfKo(t["Youtube"], locale)}`}>
                           {t["Youtube"]}
                         </p>
-                        <p className="font-extralight text-base">
+                        <p className={`font-extralight text-base ${montserratIfKo("visual_ennode", locale)}`}>
                           <a
                             href="https://www.youtube.com/@visualennode"
                             target="_blank"

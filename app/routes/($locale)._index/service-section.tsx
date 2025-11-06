@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { localePath } from "~/lib/utils";
+import { localePath, montserratIfKo } from "~/lib/utils";
 import { AppContext } from "~/root";
 
 const ServiceSection = forwardRef<HTMLElement>((props, forwardedRef) => {
@@ -207,6 +207,15 @@ const ServiceSection = forwardRef<HTMLElement>((props, forwardedRef) => {
     }
   }
 
+  // helper: when page is Korean, render ASCII/English substrings with Montserrat
+  const renderMaybeMontserrat = (text: string | null | undefined) => {
+    if (!text) return null;
+    if (locale === "ko" && /[A-Za-z]/.test(text)) {
+      return <span className="montserrat-for-en">{text}</span>;
+    }
+    return <>{text}</>;
+  };
+
   function openModal(url: string) {
     setModalUrl(url);
     // allow mount then trigger visibility for CSS transition
@@ -271,17 +280,17 @@ const ServiceSection = forwardRef<HTMLElement>((props, forwardedRef) => {
             {serviceTitleRaw ? (
                 titleMatch ? (
                 <>
-                  {titleBefore}
-                  <span className="text-red-500">{titleMatch}</span>
-                  {titleAfter}
+                  {renderMaybeMontserrat(titleBefore)}
+                  <span className="text-red-500">{renderMaybeMontserrat(titleMatch)}</span>
+                  {renderMaybeMontserrat(titleAfter)}
                 </>
               ) : (
-                <>{serviceTitle}</>
+                <>{renderMaybeMontserrat(serviceTitle)}</>
               )
             ) : (
               <>
-                {serviceTitle}{' '}
-                {shouldAppendWorks ? <span className="text-red-500">WORKS</span> : null}
+                {renderMaybeMontserrat(serviceTitle)}{' '}
+                {shouldAppendWorks ? <span className="text-red-500">{renderMaybeMontserrat('WORKS')}</span> : null}
               </>
             )}
           </h2>
@@ -421,7 +430,12 @@ const ServiceSection = forwardRef<HTMLElement>((props, forwardedRef) => {
         <div className="mt-6 sm:mt-8 md:mt-12 flex justify-center">
             <Link
               to={localePath(locale, "works")}
-              className="px-6 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 rounded-full text-white uppercase text-xs sm:text-sm tracking-wide transition-all duration-300"
+              className={`px-6 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 rounded-full text-white uppercase text-xs sm:text-sm tracking-wide transition-all duration-300 ${montserratIfKo(
+                locale === "ko"
+                  ? "더 알아보기"
+                  : (t as Record<string, string>)["Explore more"] ?? "explore more",
+                locale
+              )}`}
             >
               {locale === "ko"
                 ? "더 알아보기"

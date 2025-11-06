@@ -17,7 +17,7 @@ import { cva } from 'class-variance-authority';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import * as motion from 'motion/react-client';
-import { AnimatePresence, useMotionValue, animate, useAnimation, motion as motion$1 } from 'framer-motion';
+import { AnimatePresence, useMotionValue, animate, motion as motion$1, useAnimation } from 'framer-motion';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { ChevronRight, Check, Circle, X, MinusIcon, PlusIcon, UploadCloudIcon, ChevronDown, ChevronUp, ArrowRight, ChevronLeft } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -301,6 +301,10 @@ function localePath(locale, to) {
   }
   return path.replace(/\/$/g, "").replace("//", "");
 }
+function montserratIfKo(text, locale) {
+  if (!text || !locale || locale !== "ko") return "";
+  return /[A-Za-z]/.test(text) ? "montserrat-for-en" : "";
+}
 
 const containerVariants = cva("mx-auto px-5 py-3 sm:px-10 sm:py-5", {
   variants: {
@@ -560,13 +564,15 @@ function ContactCtaSection(props) {
       /* @__PURE__ */ jsxs("div", { className: "font-extralight text-sm sm:text-base leading-7", children: [
         /* @__PURE__ */ jsx("p", { "data-koreanable": true, children: t["component.contact.column_1.body"] }),
         /* @__PURE__ */ jsxs("p", { className: "mt-2", children: [
-          /* @__PURE__ */ jsx("span", { "data-koreanable": true, children: t["HR manager"] }),
-          ": jobs@visualennode.com"
+          /* @__PURE__ */ jsx("span", { "data-koreanable": true, className: montserratIfKo(t["HR manager"], locale), children: t["HR manager"] }),
+          ": ",
+          /* @__PURE__ */ jsx("span", { className: montserratIfKo("jobs@visualennode.com", locale), children: "jobs@visualennode.com" })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "mt-2 flex items-center gap-5", children: [
           /* @__PURE__ */ jsxs("p", { children: [
-            /* @__PURE__ */ jsx("span", { "data-koreanable": true, children: t["Phone"] }),
-            ": 02-515-7400"
+            /* @__PURE__ */ jsx("span", { "data-koreanable": true, className: montserratIfKo(t["Phone"], locale), children: t["Phone"] }),
+            ": ",
+            /* @__PURE__ */ jsx("span", { className: montserratIfKo("02-515-7400", locale), children: "02-515-7400" })
           ] }),
           /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 ml-auto", children: [
             /* @__PURE__ */ jsx(
@@ -670,7 +676,7 @@ function ContactCtaSection(props) {
             Link$1,
             {
               to: localePath(locale, "career"),
-              className: "font-semibold",
+              className: `font-semibold ${montserratIfKo(t["Career"], locale)}`,
               prefetch: "intent",
               children: t["Career"]
             }
@@ -681,30 +687,30 @@ function ContactCtaSection(props) {
     /* @__PURE__ */ jsxs("div", { className: "hidden lg:block w-96", children: [
       /* @__PURE__ */ jsx("p", { className: "font-semibold text-base sm:text-2xl mb-2", "data-koreanable": true, children: t["component.contact.column_3.title"] }),
       /* @__PURE__ */ jsx("div", { className: "font-extralight text-sm sm:text-base leading-7", children: /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-2 w-56 space-y-1", children: [
-        /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(Link$1, { to: localePath(locale, ""), className: "link-animation", children: t["Home"] }) }),
+        /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(Link$1, { to: localePath(locale, ""), className: `link-animation ${montserratIfKo(t["Home"], locale)}`, children: t["Home"] }) }),
         /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(
           Link$1,
           {
             to: localePath(locale, "career"),
-            className: "link-animation",
+            className: `link-animation ${montserratIfKo(t["Career"], locale)}`,
             children: t["Career"]
           }
         ) }),
-        /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(Link$1, { to: localePath(locale, "works"), className: "link-animation", children: t["Works"] }) }),
+        /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(Link$1, { to: localePath(locale, "works"), className: `link-animation ${montserratIfKo(t["Works"], locale)}`, children: t["Works"] }) }),
         /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(
           Link$1,
           {
             to: localePath(locale, "contact"),
-            className: "link-animation",
+            className: `link-animation ${montserratIfKo(t["Contact us"], locale)}`,
             children: t["Contact us"]
           }
         ) }),
-        /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(Link$1, { to: localePath(locale, "about"), className: "link-animation", children: t["About us"] }) }),
+        /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(Link$1, { to: localePath(locale, "about"), className: `link-animation ${montserratIfKo(t["About us"], locale)}`, children: t["About us"] }) }),
         /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(
           Link$1,
           {
             to: localePath(locale, "privacy"),
-            className: "link-animation",
+            className: `link-animation ${montserratIfKo(t["Privacy policy"], locale)}`,
             children: t["Privacy policy"]
           }
         ) })
@@ -927,7 +933,8 @@ function Header({
                     to: localePath(locale, "news"),
                     className: cn(
                       "font-light text-white/50  text-sm uppercase tracking-wide hover:opacity-70 hover:text-white transition-all duration-300 relative",
-                      location.pathname.includes("/news") ? "text-white after:absolute after:bottom-[-1.875rem] after:left-0 after:right-0 after:h-px after:bg-white" : ""
+                      location.pathname.includes("/news") ? "text-white after:absolute after:bottom-[-1.875rem] after:left-0 after:right-0 after:h-px after:bg-white" : "",
+                      montserratIfKo(t["News"], locale)
                     ),
                     children: t["News"]
                   }
@@ -982,7 +989,7 @@ function Header({
                               "w-full text-center rounded-none text-base justify-center py-2 transition-colors",
                               locale === "en" ? "bg-white text-black" : "text-white/80 hover:bg-white/5"
                             ),
-                            children: "English"
+                            children: /* @__PURE__ */ jsx("span", { className: "montserrat-for-en", children: "English" })
                           }
                         ),
                         /* @__PURE__ */ jsx(
@@ -993,7 +1000,7 @@ function Header({
                               "w-full text-center rounded-none text-base justify-center py-2 transition-colors",
                               locale === "ko" ? "bg-white text-black" : "text-white/80 hover:bg-white/5"
                             ),
-                            children: "Korean"
+                            children: /* @__PURE__ */ jsx("span", { className: "montserrat-for-en", children: "Korean" })
                           }
                         )
                       ]
@@ -1028,7 +1035,7 @@ function Header({
                                 {
                                   onClick: () => switchLocale("en"),
                                   className: "w-full text-center text-lg py-3",
-                                  children: "English"
+                                  children: /* @__PURE__ */ jsx("span", { className: "montserrat-for-en", children: "English" })
                                 }
                               ),
                               /* @__PURE__ */ jsx(
@@ -1039,7 +1046,7 @@ function Header({
                                     "w-full text-center text-xl font-medium py-4",
                                     locale === "ko" ? "bg-white text-black" : "text-white/80"
                                   ),
-                                  children: "Korean"
+                                  children: /* @__PURE__ */ jsx("span", { className: "montserrat-for-en", children: "Korean" })
                                 }
                               )
                             ]
@@ -1145,7 +1152,7 @@ function Header({
                         to: localePath(locale, "news"),
                         prefetch: "render",
                         preventScrollReset: false,
-                        className: "link-animation after:h-0.5 after:-bottom-1",
+                        className: `link-animation after:h-0.5 after:-bottom-1 ${montserratIfKo(t["News"], locale)}`,
                         onClick: () => {
                           setCollapse(true);
                           navigate(localePath(locale, "news"));
@@ -1275,7 +1282,7 @@ const genericTranslations = {
 	"Privacy policy": "Privacy policy",
 	"Explore more": "Explore more",
 	"See service": "See service",
-	"See works": "See works",
+	"See works": "See Works",
 	Contact: Contact$1,
 	"HR manager": "HR manager",
 	Phone: Phone,
@@ -1288,6 +1295,7 @@ const genericTranslations = {
 	"component.header.career": "Career",
 	"component.header.contact": "Contact",
 	"component.client.title": "Our team is dedicated to building strong, lasting relationships with our partners.",
+	"component.client.subtitle": "We build strong, long-lasting partnerships.",
 	"component.client.description": "We connect",
 	"component.contact.title": "Contact",
 	"component.contact.description": "Get connected",
@@ -1320,7 +1328,7 @@ const genericTranslations = {
 	"home.categories.cinematic": "Cinematic",
 	"home.categories.product": "Product",
 	"home.categories.vfx": "VFX",
-	"home.summary.services": "SERVICES",
+	"home.summary.services": "SERVICE",
 	"home.service.title": "SELECTED WORKS",
 	"home.service.description": "Explore the impressive portfolio of Our 3D Rendering Company to see how VISUAL ENNODE brings architectural visions to life with precision and creativity. Dive into our projects to experience the high-quality visualizations that set us apart.",
 	"ceo.name": "YOONCHANG CHUNG",
@@ -1377,6 +1385,7 @@ const genericTranslations = {
 	"contact.outline.title": "Contact us",
 	"news.page.title": "News | Visual Ennode",
 	"news.page.description": "Stay updated with the latest projects, announcements, and visual storytelling from Visual Ennode.",
+	"news.section.subtitle": "Latest news and updates",
 	"news.page.og.title": "Latest News | Visual Ennode",
 	"news.page.og.description": "Discover our recent work, creative insights, and behind-the-scenes updates from the Visual Ennode team.",
 	"news.page.twitter.title": "Visual Ennode | News & Updates",
@@ -1579,13 +1588,25 @@ function LoadingCounter({ onFinish }) {
           children: [
             /* @__PURE__ */ jsx("style", { children: `
               .fill { fill: #fff }
-              /* mask rect starts translated down (hidden) and moves up to reveal */
-              .mask-rect { transform-box: fill-box; transform: translateY(100%); animation: mask-up 1000ms ease forwards 300ms }
-              @keyframes mask-up { to { transform: translateY(0%); } }
+              /* fallback style in case JS animation doesn't run */
+              .mask-fallback { transform-box: fill-box; transform-origin: 50% 100%; }
             ` }),
             /* @__PURE__ */ jsx("defs", { children: /* @__PURE__ */ jsxs("mask", { id: "revealMask", children: [
               /* @__PURE__ */ jsx("rect", { x: "0", y: "0", width: "100%", height: "100%", fill: "black" }),
-              /* @__PURE__ */ jsx("rect", { className: "mask-rect", x: "0", y: "0", width: "100%", height: "100%", fill: "white" })
+              /* @__PURE__ */ jsx(
+                motion$1.rect,
+                {
+                  className: "mask-fallback",
+                  x: "0",
+                  y: "0",
+                  width: "100%",
+                  height: "100%",
+                  fill: "white",
+                  initial: { translateY: "100%" },
+                  animate: { translateY: "0%" },
+                  transition: { duration: 1, delay: 0.3, ease: "easeOut" }
+                }
+              )
             ] }) }),
             /* @__PURE__ */ jsxs("g", { mask: "url(#revealMask)", children: [
               /* @__PURE__ */ jsx("polygon", { className: "fill", points: "373.32 650.33 448.15 423.18 800.59 423.18 800.59 325.16 480.44 325.16 555.27 98.02 693.47 98.02 693.47 0 506.15 0 506.15 0 467.33 0 290.05 538.12 288.53 542.99 288.49 542.86 228.41 725.22 236.03 748.35 341.03 748.35 341.03 748.35 907.71 748.35 907.71 650.33 373.32 650.33" }),
@@ -2360,52 +2381,34 @@ const ContactSection = forwardRef((props, forwardedRef) => {
     if (!headerDom || !inView) return;
     headerDom.dataset.variant = "light";
   }, [inView]);
-  return /* @__PURE__ */ jsx("section", { ref, className: `flex ${locale === "ko" ? "ko-solid" : ""}`, ...props, children: /* @__PURE__ */ jsxs(Container, { className: "flex-none flex flex-col lg:h-full mt-8 py-6 sm:mt-12", children: [
-    /* @__PURE__ */ jsxs("div", { className: "text-center mb-8", "data-koreanable": true, children: [
-      /* @__PURE__ */ jsx(
-        "h3",
-        {
-          className: "font-semibold text-3xl sm:text-4xl md:text-5xl uppercase text-white mb-2 md:mb-3",
-          style: {
-            fontFamily: '"Montserrat", "Gilroy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-          },
-          children: t["component.contact.title"]
-        }
-      ),
-      /* @__PURE__ */ jsx(
-        "p",
-        {
-          className: "font-normal text-sm sm:text-base md:text-lg text-[#959595] uppercase",
-          style: {
-            fontFamily: '"Montserrat", "Gilroy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-          },
-          children: t["component.contact.description"]
-        }
-      )
-    ] }),
-    /* @__PURE__ */ jsx("div", { className: "mt-auto mb-14", children: /* @__PURE__ */ jsxs(
-      "div",
-      {
-        className: "flex flex-col gap-4 text-white text-sm sm:text-base font-extralight",
-        style: {
-          fontFamily: '"Montserrat", "Gilroy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-        },
-        children: [
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { children: t["component.contact.address_1.name"] }),
-            /* @__PURE__ */ jsx("p", { children: t["component.contact.address_1.address"] })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { children: t["component.contact.address_2.name"] }),
-            /* @__PURE__ */ jsx("p", { children: t["component.contact.address_2.address"] })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { children: t["component.contact.address_3.name"] }),
-            /* @__PURE__ */ jsx("p", { children: t["component.contact.address_3.address"] })
-          ] })
-        ]
+  return /* @__PURE__ */ jsx("section", { ref, className: "flex", ...props, children: /* @__PURE__ */ jsxs(Container, { className: "flex-none flex flex-col lg:h-full mt-8 py-6 sm:mt-12", children: [
+    (() => {
+      const titleText = t["component.contact.title"];
+      if (locale === "ko" && /[A-Za-z]/.test(titleText)) {
+        return /* @__PURE__ */ jsxs("div", { className: "text-center mb-8", "data-koreanable": true, children: [
+          /* @__PURE__ */ jsx("h3", { className: "font-semibold text-3xl sm:text-4xl md:text-5xl uppercase text-white mb-2 md:mb-3", children: /* @__PURE__ */ jsx("span", { className: "montserrat-for-en", children: titleText }) }),
+          /* @__PURE__ */ jsx("p", { className: "font-normal text-sm sm:text-base md:text-lg text-[#959595] uppercase", children: t["component.contact.description"] })
+        ] });
       }
-    ) }),
+      return /* @__PURE__ */ jsxs("div", { className: "text-center mb-8", "data-koreanable": true, children: [
+        /* @__PURE__ */ jsx("h3", { className: "font-semibold text-3xl sm:text-4xl md:text-5xl uppercase text-white mb-2 md:mb-3", children: titleText }),
+        /* @__PURE__ */ jsx("p", { className: "font-normal text-sm sm:text-base md:text-lg text-[#959595] uppercase", children: t["component.contact.description"] })
+      ] });
+    })(),
+    /* @__PURE__ */ jsx("div", { className: "mt-auto mb-14", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-4 text-white text-sm sm:text-base font-extralight", children: [
+      /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsx("p", { className: montserratIfKo(t["component.contact.address_1.name"], locale), children: t["component.contact.address_1.name"] }),
+        /* @__PURE__ */ jsx("p", { className: montserratIfKo(t["component.contact.address_1.address"], locale), children: t["component.contact.address_1.address"] })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsx("p", { className: montserratIfKo(t["component.contact.address_2.name"], locale), children: t["component.contact.address_2.name"] }),
+        /* @__PURE__ */ jsx("p", { className: montserratIfKo(t["component.contact.address_2.address"], locale), children: t["component.contact.address_2.address"] })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsx("p", { className: montserratIfKo(t["component.contact.address_3.name"], locale), children: t["component.contact.address_3.name"] }),
+        /* @__PURE__ */ jsx("p", { className: montserratIfKo(t["component.contact.address_3.address"], locale), children: t["component.contact.address_3.address"] })
+      ] })
+    ] }) }),
     /* @__PURE__ */ jsx(ContactCtaSection, {})
   ] }) });
 });
@@ -2592,6 +2595,52 @@ const route4 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   meta: meta$8
 }, Symbol.toStringTag, { value: 'Module' }));
 
+function getProjectPriority(projectTitle) {
+  const priorityOrder = {
+    "Battery Warehouse": 1,
+    "Solar Panel Balcony": 2,
+    "Parking lot": 3,
+    "Warm house": 4,
+    "Takaho Brand Showroom": 5,
+    "Basement": 6,
+    // This covers both Basement and Basement Renovation
+    "Post Office": 7,
+    "Commercial Building": 8,
+    "Evergreen Nursing Hospital": 9,
+    "Office Center": 10,
+    "Party Club": 11,
+    "Complex Apartment": 12,
+    "Gyeonggi-do 00 Jugong Apartment Reconstruction": 13,
+    "S-Factory": 14,
+    "Etispace House": 15,
+    "MOA Town Plan (Gireum-dong, Seongbuk-gu)": 16,
+    "MOA Town Plan (Samseon-dong, Seongbuk-gu)": 17,
+    "RIV Office": 18,
+    "Police Office": 19,
+    "Yeosu Expo": 20,
+    "Office Building": 21,
+    "Osan-si, Gyeonggi-do Apartment plan in": 22,
+    "Daemyoung Energy Battery Plant": 23,
+    "Geoje Island Café": 24,
+    "T.K E&C Aerial View": 25,
+    "Wedding Hall Renovation": 26
+  };
+  if (priorityOrder[projectTitle]) {
+    return priorityOrder[projectTitle];
+  }
+  for (const [priorityTitle, priority] of Object.entries(priorityOrder)) {
+    if (projectTitle.includes(priorityTitle) || priorityTitle.includes(projectTitle)) {
+      return priority;
+    }
+  }
+  if (projectTitle.toLowerCase().includes("basement")) {
+    return priorityOrder["Basement"];
+  }
+  if (projectTitle.toLowerCase().includes("daemyoung energy")) {
+    return priorityOrder["Daemyoung Energy Battery Plant"];
+  }
+  return null;
+}
 function groupWorksByProject(works) {
   const projectMap = /* @__PURE__ */ new Map();
   works.forEach((work) => {
@@ -2639,7 +2688,16 @@ function groupWorksByProject(works) {
     const representativeKey = sortedWorks[0] && sortedWorks[0].slug ? sortedWorks[0].slug : projectTitle;
     organizedProjectsWithKey.push({ project: projectObj, key: representativeKey });
   });
-  organizedProjectsWithKey.sort((a, b) => a.key.localeCompare(b.key, void 0, { sensitivity: "base" }));
+  organizedProjectsWithKey.sort((a, b) => {
+    const priorityA = getProjectPriority(a.project.title);
+    const priorityB = getProjectPriority(b.project.title);
+    if (priorityA !== null && priorityB !== null) {
+      return priorityA - priorityB;
+    }
+    if (priorityA !== null && priorityB === null) return -1;
+    if (priorityA === null && priorityB !== null) return 1;
+    return a.project.title.localeCompare(b.project.title, void 0, { sensitivity: "base" });
+  });
   return organizedProjectsWithKey.map((p) => p.project);
 }
 function normalizeProjectTitle(title) {
@@ -2656,7 +2714,7 @@ function normalizeProjectTitle(title) {
     "Wedding Hall Renovation": "Wedding Hall Renovation",
     "T.K E&C Aerial View": "T.K E&C Aerial View",
     "Geoje Island Café": "Geoje Island Café",
-    "Daemyoung Energy": "Daemyoung Energy",
+    "Daemyoung Energy Battery Plant": "Daemyoung Energy Battery Plant",
     "RIV Office": "RIV Office",
     "Office Center": "Office Center",
     "Solar Panel Balcony": "Solar Panel Balcony",
@@ -2664,7 +2722,22 @@ function normalizeProjectTitle(title) {
     "Ino Block": "Ino Block",
     "Complex apartment": "Complex Apartment",
     "Osan apartment": "Osan Apartment",
-    "S-Factory": "S-Factory"
+    "Osan-si, Gyeonggi-do Apartment plan in": "Osan-si, Gyeonggi-do Apartment plan in",
+    "S-Factory": "S-Factory",
+    "Battery Warehouse": "Battery Warehouse",
+    "Parking lot": "Parking lot",
+    "Warm house": "Warm house",
+    "Takaho Brand Showroom": "Takaho Brand Showroom",
+    "Basement": "Basement",
+    "Basement Renovation": "Basement",
+    "Post Office": "Post Office",
+    "Commercial Building": "Commercial Building",
+    "Evergreen Nursing Hospital": "Evergreen Nursing Hospital",
+    "Party Club": "Party Club",
+    "Etispace House": "Etispace House",
+    "Police Office": "Police Office",
+    "Yeosu Expo": "Yeosu Expo",
+    "Office Building": "Office Building"
   };
   return specialCases[normalized] || normalized;
 }
@@ -3308,7 +3381,7 @@ function Contact() {
         ),
         children: /* @__PURE__ */ jsx("div", { className: "w-full max-w-5xl mx-auto p-4 md:p-6 flex items-center justify-center h-full", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center text-center w-full", children: [
           /* @__PURE__ */ jsx(LottieThankYou, {}),
-          /* @__PURE__ */ jsx("h2", { className: "text-white font-extrabold text-4xl md:text-6xl tracking-tight mb-4", children: "THANK YOU" }),
+          /* @__PURE__ */ jsx("h2", { className: `text-white font-extrabold text-4xl md:text-6xl tracking-tight mb-4 ${montserratIfKo("THANK YOU", locale)}`, children: "THANK YOU" }),
           /* @__PURE__ */ jsxs("p", { className: "text-[#bcbcbc] text-base md:text-xl max-w-xl mb-6", children: [
             /* @__PURE__ */ jsx("span", { className: "md:block", children: t["We have received your information,"] }),
             " ",
@@ -3318,7 +3391,7 @@ function Contact() {
             Link$1,
             {
               to: localePath(locale, "index"),
-              className: "px-4 py-2 bg-white text-[#1b1b1b] rounded-none text-xs font-semibold",
+              className: `px-4 py-2 bg-white text-[#1b1b1b] rounded-none text-xs font-semibold ${montserratIfKo("BACK TO HOME", locale)}`,
               children: "BACK TO HOME"
             }
           )
@@ -3344,16 +3417,16 @@ function Contact() {
                 /* @__PURE__ */ jsx("h3", { className: "font-semibold text-2xl mb-7", children: t["contact.outline.title"] }),
                 /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-7", children: [
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: t["Hotline"] }),
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-base", children: "+82 2 515 7400" })
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(t["Hotline"], locale)}`, children: t["Hotline"] }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-base ${montserratIfKo("+82 2 515 7400", locale)}`, children: "+82 2 515 7400" })
                   ] }),
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: t["Email"] }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(t["Email"], locale)}`, children: t["Email"] }),
                     /* @__PURE__ */ jsx("p", { className: "font-extralight text-base font-sans", children: "contact@visualennode.com" })
                   ] }),
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: t["Kakaotalk"] }),
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-base font-sans", children: /* @__PURE__ */ jsx(
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(t["Kakaotalk"], locale)}`, children: t["Kakaotalk"] }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-base font-sans ${montserratIfKo("visualennode", locale)}`, children: /* @__PURE__ */ jsx(
                       "a",
                       {
                         href: "https://pf.kakao.com/_ggesn/chat",
@@ -3365,7 +3438,7 @@ function Contact() {
                     ) })
                   ] }),
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: t["Whatsapp"] }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(t["Whatsapp"], locale)}`, children: t["Whatsapp"] }),
                     /* @__PURE__ */ jsx("p", { className: "font-extralight text-base font-sans", children: /* @__PURE__ */ jsx(
                       "a",
                       {
@@ -3378,8 +3451,8 @@ function Contact() {
                     ) })
                   ] }),
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: t["Instagram"] }),
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-base font-sans", children: /* @__PURE__ */ jsx(
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(t["Instagram"], locale)}`, children: t["Instagram"] }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-base font-sans ${montserratIfKo("visual_ennode", locale)}`, children: /* @__PURE__ */ jsx(
                       "a",
                       {
                         href: "https://www.instagram.com/visual_ennode",
@@ -3391,8 +3464,8 @@ function Contact() {
                     ) })
                   ] }),
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: t["Youtube"] }),
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-base font-sans", children: /* @__PURE__ */ jsx(
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(t["Youtube"], locale)}`, children: t["Youtube"] }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-base font-sans ${montserratIfKo("visual_ennode", locale)}`, children: /* @__PURE__ */ jsx(
                       "a",
                       {
                         href: "https://www.youtube.com/@visualennode",
@@ -3537,8 +3610,8 @@ function Contact() {
                         className: "size-10 sm:size-16"
                       }
                     ) }),
-                    /* @__PURE__ */ jsx("span", { className: "font-medium text-lg sm:text-2xl text-[#c3c3c3]", children: t["Hotline"] }),
-                    /* @__PURE__ */ jsx("span", { className: "font-light text-sm sm:text-lg text-[#c3c3c3]", children: "+82 2 515 7400" })
+                    /* @__PURE__ */ jsx("span", { className: `font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(t["Hotline"], locale)}`, children: t["Hotline"] }),
+                    /* @__PURE__ */ jsx("span", { className: `font-light text-sm sm:text-lg text-[#c3c3c3] ${montserratIfKo("+82 2 515 7400", locale)}`, children: "+82 2 515 7400" })
                   ]
                 }
               ),
@@ -3556,8 +3629,8 @@ function Contact() {
                         className: "size-10 sm:size-16"
                       }
                     ) }),
-                    /* @__PURE__ */ jsx("span", { className: "font-medium text-lg sm:text-2xl text-[#c3c3c3]", children: emailLabel }),
-                    /* @__PURE__ */ jsx("span", { className: "font-light text-sm sm:text-lg text-[#c3c3c3] font-sans", children: "contact@visualennode.com" })
+                    /* @__PURE__ */ jsx("span", { className: `font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(emailLabel, locale)}`, children: emailLabel }),
+                    /* @__PURE__ */ jsx("span", { className: `font-light text-sm sm:text-lg text-[#c3c3c3] font-sans ${montserratIfKo("contact@visualennode.com", locale)}`, children: "contact@visualennode.com" })
                   ]
                 }
               ),
@@ -3577,8 +3650,8 @@ function Contact() {
                         className: "size-10 sm:size-16"
                       }
                     ) }),
-                    /* @__PURE__ */ jsx("span", { className: "font-medium text-lg sm:text-2xl text-[#c3c3c3]", children: t["Kakaotalk"] }),
-                    /* @__PURE__ */ jsx("span", { className: "font-light text-sm sm:text-lg text-[#c3c3c3] font-sans", children: "visualennode" })
+                    /* @__PURE__ */ jsx("span", { className: `font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(t["Kakaotalk"], locale)}`, children: t["Kakaotalk"] }),
+                    /* @__PURE__ */ jsx("span", { className: `font-light text-sm sm:text-lg text-[#c3c3c3] font-sans ${montserratIfKo("visualennode", locale)}`, children: "visualennode" })
                   ]
                 }
               ),
@@ -3598,8 +3671,8 @@ function Contact() {
                         className: "size-10 sm:size-16"
                       }
                     ) }),
-                    /* @__PURE__ */ jsx("span", { className: "font-medium text-lg sm:text-2xl text-[#c3c3c3]", children: t["Whatsapp"] }),
-                    /* @__PURE__ */ jsx("span", { className: "font-light text-sm sm:text-lg text-[#c3c3c3] font-sans", children: "+82 2 515 7400" })
+                    /* @__PURE__ */ jsx("span", { className: `font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(t["Whatsapp"], locale)}`, children: t["Whatsapp"] }),
+                    /* @__PURE__ */ jsx("span", { className: `font-light text-sm sm:text-lg text-[#c3c3c3] font-sans ${montserratIfKo("+82 2 515 7400", locale)}`, children: "+82 2 515 7400" })
                   ]
                 }
               ),
@@ -3619,8 +3692,8 @@ function Contact() {
                         className: "size-10 sm:size-16"
                       }
                     ) }),
-                    /* @__PURE__ */ jsx("span", { className: "font-medium text-lg sm:text-2xl text-[#c3c3c3]", children: t["Instagram"] }),
-                    /* @__PURE__ */ jsx("span", { className: "font-light text-sm sm:text-lg text-[#c3c3c3] font-sans", children: "visual_ennode" })
+                    /* @__PURE__ */ jsx("span", { className: `font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(t["Instagram"], locale)}`, children: t["Instagram"] }),
+                    /* @__PURE__ */ jsx("span", { className: `font-light text-sm sm:text-lg text-[#c3c3c3] font-sans ${montserratIfKo("visual_ennode", locale)}`, children: "visual_ennode" })
                   ]
                 }
               ),
@@ -3640,8 +3713,8 @@ function Contact() {
                         className: "size-10 sm:size-16"
                       }
                     ) }),
-                    /* @__PURE__ */ jsx("span", { className: "font-medium text-lg sm:text-2xl text-[#c3c3c3]", children: t["Youtube"] }),
-                    /* @__PURE__ */ jsx("span", { className: "font-light text-sm sm:text-lg text-[#c3c3c3] font-sans", children: "visual_ennode" })
+                    /* @__PURE__ */ jsx("span", { className: `font-medium text-lg sm:text-2xl text-[#c3c3c3] ${montserratIfKo(t["Youtube"], locale)}`, children: t["Youtube"] }),
+                    /* @__PURE__ */ jsx("span", { className: `font-light text-sm sm:text-lg text-[#c3c3c3] font-sans ${montserratIfKo("visual_ennode", locale)}`, children: "visual_ennode" })
                   ]
                 }
               )
@@ -3669,16 +3742,16 @@ function Contact() {
                 /* @__PURE__ */ jsx("h3", { className: "font-semibold text-2xl mb-7", children: t["contact.outline.title"] }),
                 /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-7", children: [
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: t["Hotline"] }),
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-base font-sans", children: "+82 2 515 7400" })
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(t["Hotline"], locale)}`, children: t["Hotline"] }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-base font-sans ${montserratIfKo("+82 2 515 7400", locale)}`, children: "+82 2 515 7400" })
                   ] }),
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: emailLabel }),
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-base font-sans", children: "contact@visualennode.com" })
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(emailLabel, locale)}`, children: emailLabel }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-base font-sans ${montserratIfKo("contact@visualennode.com", locale)}`, children: "contact@visualennode.com" })
                   ] }),
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: t["Kakaotalk"] }),
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-base", children: /* @__PURE__ */ jsx(
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(t["Kakaotalk"], locale)}`, children: t["Kakaotalk"] }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-base ${montserratIfKo("visualennode", locale)}`, children: /* @__PURE__ */ jsx(
                       "a",
                       {
                         href: "https://pf.kakao.com/_ggesn/chat",
@@ -3690,8 +3763,8 @@ function Contact() {
                     ) })
                   ] }),
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: t["Whatsapp"] }),
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-base", children: /* @__PURE__ */ jsx(
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(t["Whatsapp"], locale)}`, children: t["Whatsapp"] }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-base ${montserratIfKo("+82 2 515 7400", locale)}`, children: /* @__PURE__ */ jsx(
                       "a",
                       {
                         href: "https://wa.me/message/UPCT3MQH3LGSF1",
@@ -3703,8 +3776,8 @@ function Contact() {
                     ) })
                   ] }),
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: t["Instagram"] }),
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-base", children: /* @__PURE__ */ jsx(
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(t["Instagram"], locale)}`, children: t["Instagram"] }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-base ${montserratIfKo("visual_ennode", locale)}`, children: /* @__PURE__ */ jsx(
                       "a",
                       {
                         href: "https://www.instagram.com/visual_ennode",
@@ -3716,8 +3789,8 @@ function Contact() {
                     ) })
                   ] }),
                   /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-xl", children: t["Youtube"] }),
-                    /* @__PURE__ */ jsx("p", { className: "font-extralight text-base", children: /* @__PURE__ */ jsx(
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-xl ${montserratIfKo(t["Youtube"], locale)}`, children: t["Youtube"] }),
+                    /* @__PURE__ */ jsx("p", { className: `font-extralight text-base ${montserratIfKo("visual_ennode", locale)}`, children: /* @__PURE__ */ jsx(
                       "a",
                       {
                         href: "https://www.youtube.com/@visualennode",
@@ -4092,7 +4165,7 @@ function Career() {
             className: "w-20 mb-10 lg:w-32 lg:mb-14"
           }
         ),
-        /* @__PURE__ */ jsx("h3", { className: "text-[#bcbcbc] text-center font-semibold text-3xl md:text-5xl mb-2 md:mb-5", children: t["Thank you for your information"] }),
+        /* @__PURE__ */ jsx("h3", { className: `text-[#bcbcbc] text-center font-semibold text-3xl md:text-5xl mb-2 md:mb-5 ${montserratIfKo(t["Thank you for your information"], locale)}`, children: t["Thank you for your information"] }),
         /* @__PURE__ */ jsxs("p", { className: "text-[#959595] text-xl md:text-3xl font-light text-center", children: [
           /* @__PURE__ */ jsx("span", { className: "md:block", children: t["We have received your information,"] }),
           " ",
@@ -4164,11 +4237,11 @@ function Career() {
             " ",
             /* @__PURE__ */ jsx("span", { className: "text-red-600", children: "*" })
           ] }),
-          /* @__PURE__ */ jsx("div", { className: "grow w-full flex flex-col gap-1", children: /* @__PURE__ */ jsxs(Select, { defaultValue: "vietnam", name: "nationality", children: [
+          /* @__PURE__ */ jsx("div", { className: "grow w-full flex flex-col gap-1", children: /* @__PURE__ */ jsxs(Select, { defaultValue: "korea", name: "nationality", children: [
             /* @__PURE__ */ jsx(SelectTrigger, { className: "w-full text-white", children: /* @__PURE__ */ jsx(SelectValue, {}) }),
             /* @__PURE__ */ jsx(SelectContent, { className: "w-full text-white bg-black !border-none", children: /* @__PURE__ */ jsxs(SelectGroup, { children: [
-              /* @__PURE__ */ jsx(SelectItem, { value: "vietnam", children: "Vietnam" }),
               /* @__PURE__ */ jsx(SelectItem, { value: "korea", children: "Korea" }),
+              /* @__PURE__ */ jsx(SelectItem, { value: "vietnam", children: "Vietnam" }),
               /* @__PURE__ */ jsx(SelectItem, { value: "usa", children: "The United States" }),
               /* @__PURE__ */ jsx(SelectItem, { value: "canada", children: "Canada" })
             ] }) })
@@ -4209,7 +4282,7 @@ function Career() {
             ] })
           ] })
         ] }),
-        /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center mt-14 text-white", children: /* @__PURE__ */ jsx("button", { type: "submit", className: "border-2 hover:bg-white hover:text-[#1b1b1b] border-white uppercase bg-transparent px-3 py-2 font-medium text-2xl", children: t["career.form.submit"] }) })
+        /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center mt-14 text-white", children: /* @__PURE__ */ jsx("button", { type: "submit", className: `border-2 hover:bg-white hover:text-[#1b1b1b] border-white uppercase bg-transparent px-3 py-2 font-medium text-2xl ${montserratIfKo(t["career.form.submit"], locale)}`, children: t["career.form.submit"] }) })
       ] })
     ] }) })
   ] });
@@ -4242,7 +4315,7 @@ function Ennode() {
             /* @__PURE__ */ jsx(Link$1, { to: localePath(locale, "about"), className: "inline-block text-5xl xl:text-6xl font-semibold text-white uppercase drop-shadow group-hover:mb-2 duration-300", children: t["ennode.arc.title"] }),
             /* @__PURE__ */ jsxs("div", { className: "opacity-0 group-hover:opacity-100 duration-300 translate-y-4 group-hover:translate-y-0", children: [
               /* @__PURE__ */ jsx("p", { className: "font-light text-base sm:text-lg md:text-xl xl:text-2xl 2xl:text-3xl mb-2", children: t["ennode.arc.description"] }),
-              /* @__PURE__ */ jsxs(Link$1, { to: localePath(locale, "about"), className: "inline-flex items-center font-light text-base sm:text-lg md:text-xl text-white/80 mt-7", children: [
+              /* @__PURE__ */ jsxs(Link$1, { to: localePath(locale, "about"), className: `inline-flex items-center font-light text-base sm:text-lg md:text-xl text-white/80 mt-7 ${montserratIfKo(t["See service"], locale)}`, children: [
                 t["See service"],
                 " ",
                 /* @__PURE__ */ jsx(ArrowRight, { className: "size-3 ml-1" })
@@ -4253,7 +4326,7 @@ function Ennode() {
             /* @__PURE__ */ jsx(Link$1, { to: localePath(locale, "ennode/digital"), className: "inline-block text-5xl xl:text-6xl font-semibold text-white uppercase drop-shadow group-hover:mb-2 duration-300", children: t["ennode.digital.title"] }),
             /* @__PURE__ */ jsxs("div", { className: "opacity-0 group-hover:opacity-100 duration-300 translate-y-4 group-hover:translate-y-0", children: [
               /* @__PURE__ */ jsx("p", { className: "font-light text-base sm:text-lg md:text-xl xl:text-2xl 2xl:text-3xl mb-2", children: t["ennode.digital.description"] }),
-              /* @__PURE__ */ jsxs(Link$1, { to: localePath(locale, "ennode/digital"), className: "inline-flex items-center font-light text-base sm:text-lg md:text-xl text-white/80 mt-7", children: [
+              /* @__PURE__ */ jsxs(Link$1, { to: localePath(locale, "ennode/digital"), className: `inline-flex items-center font-light text-base sm:text-lg md:text-xl text-white/80 mt-7 ${montserratIfKo(t["See service"], locale)}`, children: [
                 t["See service"],
                 " ",
                 /* @__PURE__ */ jsx(ArrowRight, { className: "size-3 ml-1" })
@@ -4336,7 +4409,7 @@ const DefinitionSection = forwardRef((props, ref) => {
 DefinitionSection.displayName = "DefinitionSection";
 
 const ValueSection = forwardRef((props, ref) => {
-  const { translations: t } = useOutletContext();
+  const { translations: t, locale } = useOutletContext();
   return /* @__PURE__ */ jsx(
     "section",
     {
@@ -4364,12 +4437,12 @@ const ValueSection = forwardRef((props, ref) => {
               /* @__PURE__ */ jsxs(
                 "span",
                 {
-                  className: "text-lg sm:text-[25px] font-extrabold mt-14 block",
+                  className: `text-lg sm:text-[25px] font-extrabold mt-14 block ${montserratIfKo(t["STORY MAKE VALUE"], locale)}`,
                   "data-koreanable": true,
                   children: [
-                    "“ ",
+                    '" ',
                     t["STORY MAKE VALUE"],
-                    " ”"
+                    ' "'
                   ]
                 }
               )
@@ -4401,24 +4474,27 @@ const ClientSection = forwardRef(
         className: "min-h-[80vh] flex py-0 sm:py-8 lg:pb-20",
         ...props,
         children: /* @__PURE__ */ jsxs(Container, { className: "flex-none m-auto min-h-full flex flex-col w-full px-4 sm:px-6", children: [
-          /* @__PURE__ */ jsx("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:mt-14 mb-4 sm:mb-6", children: /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx("h2", { className: "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight uppercase", children: (() => {
-            const raw = String(t["component.client.title"] ?? "");
-            if (raw.includes("||")) {
-              return raw.split("||").map(
-                (part, i) => i % 2 === 1 ? /* @__PURE__ */ jsx("span", { className: "text-red-500", children: part }, i) : /* @__PURE__ */ jsx("span", { children: part }, i)
-              );
-            }
-            const phrase = "strong, lasting relationships";
-            if (raw.includes(phrase)) {
-              const parts = raw.split(phrase);
-              return /* @__PURE__ */ jsxs(Fragment, { children: [
-                parts[0],
-                /* @__PURE__ */ jsx("span", { className: "text-red-500", children: phrase }),
-                parts[1]
-              ] });
-            }
-            return raw;
-          })() }) }) }),
+          /* @__PURE__ */ jsx("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:mt-14 mb-4 sm:mb-6", children: /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("h2", { className: "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight uppercase text-center", children: (() => {
+              const raw = String(t["component.client.title"] ?? "");
+              if (raw.includes("||")) {
+                return raw.split("||").map(
+                  (part, i) => i % 2 === 1 ? /* @__PURE__ */ jsx("span", { className: "text-red-500", children: part }, i) : /* @__PURE__ */ jsx("span", { children: part }, i)
+                );
+              }
+              const phrase = "strong, lasting relationships";
+              if (raw.includes(phrase)) {
+                const parts = raw.split(phrase);
+                return /* @__PURE__ */ jsxs(Fragment, { children: [
+                  parts[0],
+                  /* @__PURE__ */ jsx("span", { className: "text-red-500", children: phrase }),
+                  parts[1]
+                ] });
+              }
+              return raw;
+            })() }),
+            /* @__PURE__ */ jsx("h3", { id: "client-subtitle", "data-testid": "client-subtitle", className: "mt-4 text-lg sm:text-xl text-white/80 font-normal", children: String(t["component.client.subtitle"] ?? "Client subtitle") })
+          ] }) }),
           /* @__PURE__ */ jsx("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 md:px-12", children: /* @__PURE__ */ jsx("div", { className: "w-full bg-[#1f1f1f] rounded-lg p-4 sm:p-6 md:p-8 lg:p-8", children: clients.length > 0 ? /* @__PURE__ */ jsx("div", { className: "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-8 md:gap-12 lg:gap-24 items-center justify-items-center", children: clients.map((client, index) => /* @__PURE__ */ jsx(
             "div",
             {
@@ -4513,20 +4589,20 @@ const defaultItems = [
 const localizedItems = {
   ko: [
     {
-      title: "예산 상담",
-      subtitles: ["예산 및 일정 상담", "계약서 서명 및 결제"]
+      title: "작업 의뢰",
+      subtitles: ["예산 및 일정 상담", "장면 및 구도 / 범위 상담"]
     },
     {
-      title: "기획 및 작업",
-      subtitles: ["3D 작업 및 프로젝트 계획 시작"]
+      title: "작업 기획",
+      subtitles: ["프로젝트 컨셉 기획, 3D 작업"]
     },
     {
-      title: "초안 및 수정",
-      subtitles: ["첫 번째 초안 전달", "두 번째 초안 전달", "최종 고해상도 이미지 전달"]
+      title: "시안 공유 및 수정",
+      subtitles: ["1차 시안 전달", "2차 시안 전달", "최종 고해상도 이미지 전달"]
     },
     {
-      title: "최종 검수",
-      subtitles: ["계약 종료", "뷰락 / 이미지 범위 상담", "최종 결제 송금 / 라이선스 이전"]
+      title: "최종 검토 및 납품",
+      subtitles: ["최종 검토", "최종 결제 및 라이선스 이전"]
     }
   ]
 };
@@ -4897,10 +4973,9 @@ function Works() {
                   Link$1,
                   {
                     to: localePath(locale, "/works/image"),
-                    className: "hidden lg:inline-flex items-center text-xl text-white/80 font-light mt-7",
+                    className: `hidden lg:inline-flex items-center text-xl text-white/80 font-light mt-7`,
                     children: [
-                      isKoreanLocale ? "작업 보기" : t["See works"],
-                      " ",
+                      "See Works ",
                       /* @__PURE__ */ jsx(ArrowRight, { className: "size-3 ml-1" })
                     ]
                   }
@@ -4956,10 +5031,9 @@ function Works() {
                   Link$1,
                   {
                     to: localePath(locale, "/works/cinematic"),
-                    className: "hidden lg:inline-flex items-center text-xl text-white/80 font-light mt-7",
+                    className: `hidden lg:inline-flex items-center text-xl text-white/80 font-light mt-7`,
                     children: [
-                      isKoreanLocale ? "회사 소개 보기" : t["See works"],
-                      " ",
+                      "See Works",
                       /* @__PURE__ */ jsx(ArrowRight, { className: "size-3 ml-1" })
                     ]
                   }
@@ -5058,14 +5132,17 @@ function Index$1() {
         className: "flex-none m-auto min-h-full flex flex-col",
         variant: "fluid",
         children: [
-          /* @__PURE__ */ jsx("div", { className: "text-center mt-14 mb-2", children: /* @__PURE__ */ jsx(
-            "h3",
-            {
-              className: "font-semibold text-3xl sm:text-4xl md:text-5xl uppercase text-white mb-2",
-              "data-koreanable": true,
-              children: t["New update"]
-            }
-          ) }),
+          /* @__PURE__ */ jsxs("div", { className: "text-center mt-14 mb-2", children: [
+            /* @__PURE__ */ jsx(
+              "h3",
+              {
+                className: "font-semibold text-3xl sm:text-4xl md:text-5xl uppercase text-white mb-2",
+                "data-koreanable": true,
+                children: t["New update"]
+              }
+            ),
+            /* @__PURE__ */ jsx("h4", { className: "text-white/70 text-base sm:text-lg mt-2", "data-koreanable": true, children: String(t["news.section.subtitle"] ?? "Latest news and updates") })
+          ] }),
           /* @__PURE__ */ jsx("div", { className: "grid grid-cols-2 lg:grid-cols-4 gap-3 my-auto", children: (newsPagination?.data ?? []).map((news, index) => /* @__PURE__ */ jsxs(
             Link$1,
             {
@@ -5108,6 +5185,7 @@ function Index$1() {
                 },
                 className: cn(
                   "border-2 border-white uppercase bg-transparent text-white inline-flex items-center gap-2 px-3 py-2 font-medium text-xl md:text-2xl",
+                  montserratIfKo(t["Previous"], locale),
                   newsPagination.meta.current_page === 1 ? "opacity-10 cursor-not-allowed disabled" : " hover:bg-white hover:text-[#1b1b1b]"
                 ),
                 children: [
@@ -5125,6 +5203,7 @@ function Index$1() {
                 },
                 className: cn(
                   "border-2 border-white uppercase bg-transparent text-white inline-flex items-center px-3 py-2 font-medium text-xl md:text-2xl",
+                  montserratIfKo(t["Next"], locale),
                   newsPagination.meta.current_page === newsPagination.meta.last_page ? "opacity-10 cursor-not-allowed disabled" : " hover:bg-white hover:text-[#1b1b1b]"
                 ),
                 children: [
@@ -5389,7 +5468,7 @@ HeroSection.displayName = "HeroSection";
 
 const SummarySection = forwardRef((props, forwardedRef) => {
   const ref = useRef(null);
-  const { translations } = useOutletContext();
+  const { translations, locale } = useOutletContext();
   const inView = useInView(ref, { amount: 1 });
   useImperativeHandle(forwardedRef, () => ref.current);
   useEffect(() => {
@@ -5559,7 +5638,16 @@ const SummarySection = forwardRef((props, forwardedRef) => {
       ...props,
       children: /* @__PURE__ */ jsx("div", { className: "relative h-full z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 min-w-0", children: /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 md:grid-cols-12 items-start md:items-center md:min-h-[70vh] gap-8 md:gap-12", children: [
         /* @__PURE__ */ jsxs("div", { className: "md:col-span-5 col-span-12 h-full hidden md:flex md:flex-col justify-between md:self-end md:relative order-2 md:order-1", children: [
-          /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx("h2", { className: "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight", children: translations["home.summary.services"] ?? "SERVICES" }) }),
+          /* @__PURE__ */ jsx("div", {
+            // ensure English words like "SERVICES" render with Montserrat on Korean pages
+            children: (() => {
+              const svc = translations["home.summary.services"] ?? "SERVICE";
+              if (locale === "ko" && /[A-Za-z]/.test(svc)) {
+                return /* @__PURE__ */ jsx("h2", { className: "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight", children: /* @__PURE__ */ jsx("span", { className: "montserrat-for-en", children: svc }) });
+              }
+              return /* @__PURE__ */ jsx("h2", { className: "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight", children: svc });
+            })()
+          }),
           /* @__PURE__ */ jsx("div", { className: "space-y-2 md:space-y-4", children: categories.map((label, i) => /* @__PURE__ */ jsx(
             "button",
             {
@@ -5598,7 +5686,7 @@ const SummarySection = forwardRef((props, forwardedRef) => {
                 /* @__PURE__ */ jsx(
                   "span",
                   {
-                    className: `text-[20px] md:text-5xl text-outline block transform ${selected === i || hovered === i ? "text-white/100" : "text-white/60"}`,
+                    className: `text-[20px] md:text-5xl text-outline block transform ${selected === i || hovered === i ? "text-white/100" : "text-white/60"} ${montserratIfKo(label, locale)}`,
                     style: {
                       fontFamily: "'Gilroy', sans-serif",
                       letterSpacing: "-0.44px"
@@ -5687,7 +5775,7 @@ const SummarySection = forwardRef((props, forwardedRef) => {
                           children: "‹"
                         }
                       ),
-                      /* @__PURE__ */ jsx("div", { className: "mx-3 px-4 py-2 rounded-full bg-black/60 backdrop-blur-sm text-white text-sm flex items-center gap-3 min-w-[120px] justify-center", children: /* @__PURE__ */ jsx("span", { className: "font-medium truncate", children: categories[visibleIndex] ?? "" }) }),
+                      /* @__PURE__ */ jsx("div", { className: `mx-3 px-4 py-2 rounded-full bg-black/60 backdrop-blur-sm text-white text-sm flex items-center gap-3 min-w-[120px] justify-center ${montserratIfKo(categories[visibleIndex] ?? "", locale)}`, children: /* @__PURE__ */ jsx("span", { className: "font-medium truncate", children: categories[visibleIndex] ?? "" }) }),
                       /* @__PURE__ */ jsx(
                         "button",
                         {
@@ -5883,6 +5971,13 @@ const ServiceSection = forwardRef((props, forwardedRef) => {
       }
     }
   }
+  const renderMaybeMontserrat = (text) => {
+    if (!text) return null;
+    if (locale === "ko" && /[A-Za-z]/.test(text)) {
+      return /* @__PURE__ */ jsx("span", { className: "montserrat-for-en", children: text });
+    }
+    return /* @__PURE__ */ jsx(Fragment, { children: text });
+  };
   function openModal(url) {
     setModalUrl(url);
     requestAnimationFrame(() => setModalVisible(true));
@@ -5933,13 +6028,13 @@ const ServiceSection = forwardRef((props, forwardedRef) => {
       children: [
         /* @__PURE__ */ jsx("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-8 sm:pt-12 min-w-0", children: /* @__PURE__ */ jsxs("div", { children: [
           /* @__PURE__ */ jsx("h2", { className: "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight", children: serviceTitleRaw ? titleMatch ? /* @__PURE__ */ jsxs(Fragment, { children: [
-            titleBefore,
-            /* @__PURE__ */ jsx("span", { className: "text-red-500", children: titleMatch }),
-            titleAfter
-          ] }) : /* @__PURE__ */ jsx(Fragment, { children: serviceTitle }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-            serviceTitle,
+            renderMaybeMontserrat(titleBefore),
+            /* @__PURE__ */ jsx("span", { className: "text-red-500", children: renderMaybeMontserrat(titleMatch) }),
+            renderMaybeMontserrat(titleAfter)
+          ] }) : /* @__PURE__ */ jsx(Fragment, { children: renderMaybeMontserrat(serviceTitle) }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+            renderMaybeMontserrat(serviceTitle),
             " ",
-            shouldAppendWorks ? /* @__PURE__ */ jsx("span", { className: "text-red-500", children: "WORKS" }) : null
+            shouldAppendWorks ? /* @__PURE__ */ jsx("span", { className: "text-red-500", children: renderMaybeMontserrat("WORKS") }) : null
           ] }) }),
           /* @__PURE__ */ jsx("p", { className: "mt-3 sm:mt-4 max-w-[68rem] text-base sm:text-lg md:text-xl text-white/80 leading-relaxed", children: t["home.service.description"] ?? "Explore the impressive portfolio of Our 3D Rendering Company to see how VISUAL ENNODE brings architectural visions to life with precision and creativity. Dive into our projects to experience the high-quality visualizations that set us apart." })
         ] }) }),
@@ -6036,7 +6131,10 @@ const ServiceSection = forwardRef((props, forwardedRef) => {
             Link$1,
             {
               to: localePath(locale, "works"),
-              className: "px-6 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 rounded-full text-white uppercase text-xs sm:text-sm tracking-wide transition-all duration-300",
+              className: `px-6 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 rounded-full text-white uppercase text-xs sm:text-sm tracking-wide transition-all duration-300 ${montserratIfKo(
+                locale === "ko" ? "더 알아보기" : t["Explore more"] ?? "explore more",
+                locale
+              )}`,
               children: locale === "ko" ? "더 알아보기" : t["Explore more"] ?? "explore more"
             }
           ) })
@@ -6234,19 +6332,13 @@ const NewsSection = forwardRef((props, forwardedRef) => {
       /* @__PURE__ */ jsx("div", { className: "absolute left-0 top-0 opacity-5 pointer-events-none hidden sm:block", children: /* @__PURE__ */ jsx("img", { src: "/images/ennode-placeholder.webp", alt: "", className: "w-32 sm:w-40 lg:w-48 h-32 sm:h-40 lg:h-48 object-contain" }) }),
       /* @__PURE__ */ jsxs("div", { className: "flex flex-col sm:flex-row items-start sm:items-baseline justify-between gap-4 sm:gap-6", children: [
         /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("h2", { className: "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight", children: locale === "ko" ? /* @__PURE__ */ jsxs(Fragment, { children: [
-            /* @__PURE__ */ jsx("span", { className: "", children: "RELATED " }),
-            /* @__PURE__ */ jsx("span", { className: "text-red-500", children: "NEWS" })
-          ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-            /* @__PURE__ */ jsxs("span", { className: "", children: [
-              "RELATED",
-              " "
-            ] }),
-            /* @__PURE__ */ jsx("span", { className: " text-red-500", children: t["NEWS"] ?? "NEWS" })
+          /* @__PURE__ */ jsx("h2", { className: "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight", children: /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx("span", { className: locale === "ko" ? "montserrat-for-en" : "", children: "RELATED " }),
+            /* @__PURE__ */ jsx("span", { className: (locale === "ko" ? "montserrat-for-en " : "") + "text-red-500", children: t["NEWS"] ?? "NEWS" })
           ] }) }),
-          /* @__PURE__ */ jsx("p", { className: "text-base sm:text-lg text-white/60 mt-2 sm:mt-3", children: t["New update"] ?? "Latest articles" })
+          /* @__PURE__ */ jsx("p", { className: `text-base sm:text-lg text-white/60 mt-2 sm:mt-3 ${montserratIfKo(t["New update"] ?? "Latest articles", locale)}`, children: t["New update"] ?? "Latest articles" })
         ] }),
-        props.newsCount > 4 && /* @__PURE__ */ jsxs(Link$1, { to: localePath(locale, "news"), className: "text-xs sm:text-sm text-white/70 hover:text-white transition whitespace-nowrap", children: [
+        props.newsCount > 4 && /* @__PURE__ */ jsxs(Link$1, { to: localePath(locale, "news"), className: `text-xs sm:text-sm text-white/70 hover:text-white transition whitespace-nowrap ${montserratIfKo(t["See more"] ?? "See more", locale)}`, children: [
           t["See more"] ?? "See more",
           " (",
           props.newsCount,
@@ -6270,7 +6362,7 @@ const NewsSection = forwardRef((props, forwardedRef) => {
       ] }) }, index)) }),
       /* @__PURE__ */ jsx("div", { "aria-hidden": true, className: "absolute inset-x-0 bottom-0 h-[32%] bg-gradient-to-b from-transparent to-[#1b1b1b] pointer-events-none z-10" })
     ] }),
-    /* @__PURE__ */ jsx("div", { className: "mt-4 sm:mt-5 lg:mt-6 flex justify-center", children: /* @__PURE__ */ jsx(Link$1, { to: localePath(locale, "news"), className: "px-6 py-2 sm:py-3 bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/30 rounded-full text-white uppercase text-xs sm:text-sm tracking-wide transition-all duration-300", children: getT("Go to news") }) })
+    /* @__PURE__ */ jsx("div", { className: "mt-4 sm:mt-5 lg:mt-6 flex justify-center", children: /* @__PURE__ */ jsx(Link$1, { to: localePath(locale, "news"), className: `px-6 py-2 sm:py-3 bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/30 rounded-full text-white uppercase text-xs sm:text-sm tracking-wide transition-all duration-300 ${montserratIfKo(getT("Go to news"), locale)}`, children: getT("Go to news") }) })
   ] }) }) });
 });
 NewsSection.displayName = "NewsSection";
@@ -6499,14 +6591,14 @@ const route15 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: DebugOverflow
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const serverManifest = {'entry':{'module':'/assets/entry.client-C0dgAWPW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js'],'css':[]},'routes':{'root':{'id':'root','parentId':undefined,'path':'','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':true,'module':'/assets/root-C3mFFlC7.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js','/assets/useTranslation-C2uTB0a1.js','/assets/container-CojEoyE2.js','/assets/icon-1JAR9nfD.js','/assets/utils-D0ylI7G6.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/index-BgzGjlS9.js','/assets/chevron-right-BxmQk4H8.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/contact-cta-section-2SlM14m2.js','/assets/loading-counter-_F4FMf26.js','/assets/elements--fEydBSX.js','/assets/index-D3ZRcz1e.js','/assets/resolve-elements-WL2ErOKm.js'],'css':['/assets/root-BToPztFQ.css']},'routes/($locale).ennode.digital._index':{'id':'routes/($locale).ennode.digital._index','parentId':'root','path':':locale?/ennode/digital','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-gvS26bfc.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/carousel-7zbWv1Ed.js','/assets/container-CojEoyE2.js','/assets/utils-D0ylI7G6.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js'],'css':[]},'routes/($locale).works.$category.$work':{'id':'routes/($locale).works.$category.$work','parentId':'routes/($locale).works.$category','path':':work','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-ifeU1AWH.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/Combination-Bn4r43AQ.js','/assets/index-BgzGjlS9.js','/assets/utils-D0ylI7G6.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/icon-1JAR9nfD.js','/assets/i18n-DH-wL5Eu.js','/assets/elements--fEydBSX.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).ennode.arc._index':{'id':'routes/($locale).ennode.arc._index','parentId':'root','path':':locale?/ennode/arc','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CtW7sTFJ.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/team-section-keE0Tp2P.js','/assets/i18n-DH-wL5Eu.js','/assets/container-CojEoyE2.js','/assets/utils-D0ylI7G6.js','/assets/carousel-7zbWv1Ed.js'],'css':[]},'routes/($locale).news.$slug._index':{'id':'routes/($locale).news.$slug._index','parentId':'root','path':':locale?/news/:slug','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CJGPMihu.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-DJ3PVcKY.js','/assets/utils-D0ylI7G6.js','/assets/container-CojEoyE2.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-2SlM14m2.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works.$category':{'id':'routes/($locale).works.$category','parentId':'root','path':':locale?/works/:category','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-ByD0l9_9.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-CojEoyE2.js','/assets/icon-1JAR9nfD.js','/assets/utils-D0ylI7G6.js','/assets/carousel-7zbWv1Ed.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/elements--fEydBSX.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).contact._index':{'id':'routes/($locale).contact._index','parentId':'root','path':':locale?/contact','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-Bdg434ti.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-DJ3PVcKY.js','/assets/container-CojEoyE2.js','/assets/index-D3ZRcz1e.js','/assets/utils-D0ylI7G6.js','/assets/icon-1JAR9nfD.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-2SlM14m2.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).career._index':{'id':'routes/($locale).career._index','parentId':'root','path':':locale?/career','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BVdgDDNT.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-CojEoyE2.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/index-D3ZRcz1e.js','/assets/i18n-DH-wL5Eu.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/utils-D0ylI7G6.js'],'css':[]},'routes/($locale).ennode._index':{'id':'routes/($locale).ennode._index','parentId':'root','path':':locale?/ennode','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-Bfjd2YkB.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-CojEoyE2.js','/assets/utils-D0ylI7G6.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon-$name':{'id':'routes/($locale).favicon-$name','parentId':'root','path':':locale?/favicon-$name','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon-_name-CZ0Ns0X4.js','imports':[],'css':[]},'routes/($locale).about._index':{'id':'routes/($locale).about._index','parentId':'root','path':':locale?/about','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DbQDtLPy.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-CojEoyE2.js','/assets/i18n-DH-wL5Eu.js','/assets/utils-D0ylI7G6.js','/assets/process-section-C_Q1S_I1.js','/assets/team-section-keE0Tp2P.js','/assets/contact-section-DJ3PVcKY.js','/assets/carousel-7zbWv1Ed.js','/assets/contact-cta-section-2SlM14m2.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works._index':{'id':'routes/($locale).works._index','parentId':'root','path':':locale?/works','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DERifu37.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-D0ylI7G6.js','/assets/contact-section-DJ3PVcKY.js','/assets/i18n-DH-wL5Eu.js','/assets/useTranslation-C2uTB0a1.js','/assets/arrow-right-DofWVnUm.js','/assets/elements--fEydBSX.js','/assets/container-CojEoyE2.js','/assets/contact-cta-section-2SlM14m2.js','/assets/resolve-elements-WL2ErOKm.js','/assets/context-DOdfq747.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon.ico':{'id':'routes/($locale).favicon.ico','parentId':'root','path':':locale?/favicon/ico','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon.ico-l0sNRNKZ.js','imports':[],'css':[]},'routes/($locale).news._index':{'id':'routes/($locale).news._index','parentId':'root','path':':locale?/news','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BfEML5X6.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-D0ylI7G6.js','/assets/contact-section-DJ3PVcKY.js','/assets/container-CojEoyE2.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/chevron-right-BxmQk4H8.js','/assets/contact-cta-section-2SlM14m2.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale)._index':{'id':'routes/($locale)._index','parentId':'root','path':':locale?','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-Btk6SR1K.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-D0ylI7G6.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/elements--fEydBSX.js','/assets/contact-section-DJ3PVcKY.js','/assets/loading-counter-_F4FMf26.js','/assets/process-section-C_Q1S_I1.js','/assets/container-CojEoyE2.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/resolve-elements-WL2ErOKm.js','/assets/contact-cta-section-2SlM14m2.js'],'css':[]},'routes/debug.overflow':{'id':'routes/debug.overflow','parentId':'root','path':'debug/overflow','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/debug.overflow-C_wAp7uD.js','imports':['/assets/jsx-runtime-kF-aRxYe.js'],'css':[]}},'url':'/assets/manifest-913e1dff.js','version':'913e1dff'};
+const serverManifest = {'entry':{'module':'/assets/entry.client-C0dgAWPW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js'],'css':[]},'routes':{'root':{'id':'root','parentId':undefined,'path':'','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':true,'module':'/assets/root-_Spdotfe.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js','/assets/useTranslation-C2uTB0a1.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/index-BgzGjlS9.js','/assets/chevron-right-BxmQk4H8.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/contact-cta-section-CxMAmjan.js','/assets/loading-counter-C7EV_7Hk.js','/assets/elements-Dbp8aVoy.js','/assets/index-D3ZRcz1e.js','/assets/resolve-elements-WL2ErOKm.js'],'css':['/assets/root-Bl91F1F8.css']},'routes/($locale).ennode.digital._index':{'id':'routes/($locale).ennode.digital._index','parentId':'root','path':':locale?/ennode/digital','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CyQhggqy.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/carousel-9jwcCCO4.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js'],'css':[]},'routes/($locale).works.$category.$work':{'id':'routes/($locale).works.$category.$work','parentId':'routes/($locale).works.$category','path':':work','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-Bd1YvllV.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/Combination-Bn4r43AQ.js','/assets/index-BgzGjlS9.js','/assets/utils-tQ8evKDJ.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/icon-CP4mJMRx.js','/assets/i18n-DH-wL5Eu.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).ennode.arc._index':{'id':'routes/($locale).ennode.arc._index','parentId':'root','path':':locale?/ennode/arc','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CnigBhY1.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/team-section-CkguuTle.js','/assets/i18n-DH-wL5Eu.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js'],'css':[]},'routes/($locale).news.$slug._index':{'id':'routes/($locale).news.$slug._index','parentId':'root','path':':locale?/news/:slug','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-qjyqTzn-.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-DNfO6T1S.js','/assets/utils-tQ8evKDJ.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-CxMAmjan.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works.$category':{'id':'routes/($locale).works.$category','parentId':'root','path':':locale?/works/:category','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BjgdLnI0.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).contact._index':{'id':'routes/($locale).contact._index','parentId':'root','path':':locale?/contact','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-C2h53AmM.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-DNfO6T1S.js','/assets/container-2TlAo-hG.js','/assets/index-D3ZRcz1e.js','/assets/utils-tQ8evKDJ.js','/assets/icon-CP4mJMRx.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-CxMAmjan.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).career._index':{'id':'routes/($locale).career._index','parentId':'root','path':':locale?/career','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CKY_r0Uh.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/index-D3ZRcz1e.js','/assets/i18n-DH-wL5Eu.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/utils-tQ8evKDJ.js'],'css':[]},'routes/($locale).ennode._index':{'id':'routes/($locale).ennode._index','parentId':'root','path':':locale?/ennode','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-oJw-tJEK.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon-$name':{'id':'routes/($locale).favicon-$name','parentId':'root','path':':locale?/favicon-$name','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon-_name-CZ0Ns0X4.js','imports':[],'css':[]},'routes/($locale).about._index':{'id':'routes/($locale).about._index','parentId':'root','path':':locale?/about','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CWSJk5WG.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/utils-tQ8evKDJ.js','/assets/process-section-CDoHLfT7.js','/assets/team-section-CkguuTle.js','/assets/contact-section-DNfO6T1S.js','/assets/carousel-9jwcCCO4.js','/assets/contact-cta-section-CxMAmjan.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works._index':{'id':'routes/($locale).works._index','parentId':'root','path':':locale?/works','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-C7x-zQ-e.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-DNfO6T1S.js','/assets/i18n-DH-wL5Eu.js','/assets/useTranslation-C2uTB0a1.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/container-2TlAo-hG.js','/assets/contact-cta-section-CxMAmjan.js','/assets/resolve-elements-WL2ErOKm.js','/assets/context-DOdfq747.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon.ico':{'id':'routes/($locale).favicon.ico','parentId':'root','path':':locale?/favicon/ico','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon.ico-l0sNRNKZ.js','imports':[],'css':[]},'routes/($locale).news._index':{'id':'routes/($locale).news._index','parentId':'root','path':':locale?/news','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-TnL13tQQ.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-DNfO6T1S.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/chevron-right-BxmQk4H8.js','/assets/contact-cta-section-CxMAmjan.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale)._index':{'id':'routes/($locale)._index','parentId':'root','path':':locale?','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DJyVaW4_.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/contact-section-DNfO6T1S.js','/assets/loading-counter-C7EV_7Hk.js','/assets/process-section-CDoHLfT7.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/resolve-elements-WL2ErOKm.js','/assets/contact-cta-section-CxMAmjan.js'],'css':[]},'routes/debug.overflow':{'id':'routes/debug.overflow','parentId':'root','path':'debug/overflow','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/debug.overflow-C_wAp7uD.js','imports':['/assets/jsx-runtime-kF-aRxYe.js'],'css':[]}},'url':'/assets/manifest-cebbbc97.js','version':'cebbbc97'};
 
 /**
        * `mode` is only relevant for the old Remix compiler but
        * is included here to satisfy the `ServerBuild` typings.
        */
       const mode = "production";
-      const assetsBuildDirectory = "build/client";
+      const assetsBuildDirectory = "build\\client";
       const basename = "/";
       const future = {"v3_fetcherPersist":true,"v3_relativeSplatPath":true,"v3_throwAbortReason":true,"v3_routeConfig":false,"v3_singleFetch":true,"v3_lazyRouteDiscovery":false,"unstable_optimizeDeps":false};
       const isSpaMode = false;

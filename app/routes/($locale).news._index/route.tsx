@@ -1,5 +1,5 @@
 import type { MetaFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { cn, localePath, title } from "~/lib/utils";
+import { cn, localePath, title, montserratIfKo } from "~/lib/utils";
 import type { AppContext, loader as rootLoader } from "~/root";
 import { ContactSection } from "~/components/contact-section";
 import { Api } from "~/lib/api";
@@ -84,6 +84,9 @@ export default function Index() {
             >
               {t["New update"]}
             </h3>
+            <h4 className="text-white/70 text-base sm:text-lg mt-2" data-koreanable>
+              {String(t["news.section.subtitle"] ?? "Latest news and updates")}
+            </h4>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 my-auto">
@@ -131,6 +134,7 @@ export default function Index() {
                 }}
                 className={cn(
                   "border-2 border-white uppercase bg-transparent text-white inline-flex items-center gap-2 px-3 py-2 font-medium text-xl md:text-2xl",
+                  montserratIfKo(t["Previous"], locale),
                   newsPagination.meta.current_page === 1
                     ? "opacity-10 cursor-not-allowed disabled"
                     : " hover:bg-white hover:text-[#1b1b1b]"
@@ -149,6 +153,7 @@ export default function Index() {
                 }}
                 className={cn(
                   "border-2 border-white uppercase bg-transparent text-white inline-flex items-center px-3 py-2 font-medium text-xl md:text-2xl",
+                  montserratIfKo(t["Next"], locale),
                   newsPagination.meta.current_page ===
                     newsPagination.meta.last_page
                     ? "opacity-10 cursor-not-allowed disabled"

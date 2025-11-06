@@ -2,7 +2,7 @@ import { Attachment } from "~/types/resources";
 import { Container } from "./ui/container";
 import { CrossIcon, GlobeIcon, HamburgerMenuIcon } from "./ui/icon";
 import { useEffect, useState, useRef } from "react";
-import { cn, localePath } from "~/lib/utils";
+import { cn, localePath, montserratIfKo } from "~/lib/utils";
 import {
   Link,
   useLocation,
@@ -256,7 +256,8 @@ export default function Header({
               "font-light text-white/50  text-sm uppercase tracking-wide hover:opacity-70 hover:text-white transition-all duration-300 relative",
               location.pathname.includes("/news")
                 ? "text-white after:absolute after:bottom-[-1.875rem] after:left-0 after:right-0 after:h-px after:bg-white"
-                : ""
+                : "",
+              montserratIfKo(t["News"] as string, locale)
             )}
           >
             {t["News"]}
@@ -308,7 +309,7 @@ export default function Header({
                       : "text-white/80 hover:bg-white/5"
                   )}
                 >
-                  English
+                  <span className="montserrat-for-en">English</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => switchLocale("ko")}
@@ -319,7 +320,7 @@ export default function Header({
                       : "text-white/80 hover:bg-white/5"
                   )}
                 >
-                  Korean
+                  <span className="montserrat-for-en">Korean</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -352,7 +353,7 @@ export default function Header({
                       onClick={() => switchLocale("en")}
                       className="w-full text-center text-lg py-3"
                     >
-                      English
+                      <span className="montserrat-for-en">English</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => switchLocale("ko")}
@@ -361,7 +362,7 @@ export default function Header({
                         locale === "ko" ? "bg-white text-black" : "text-white/80"
                       )}
                     >
-                      Korean
+                      <span className="montserrat-for-en">Korean</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -454,7 +455,7 @@ export default function Header({
                   to={localePath(locale, "news")}
                   prefetch="render"
                   preventScrollReset={false}
-                  className="link-animation after:h-0.5 after:-bottom-1"
+                  className={`link-animation after:h-0.5 after:-bottom-1 ${montserratIfKo(t["News"] as string, locale)}`}
                   onClick={() => {
                     setCollapse(true);
                     navigate(localePath(locale, "news"));

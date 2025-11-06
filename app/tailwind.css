@@ -50,7 +50,7 @@ body {
   @font-face {
     font-family: SpoqaHanSansNeo;
     /* fix: directory name is "SpoqaHanSansNeo_TTF_original" (typo earlier) */
-    src: local("Spoqa Han Sans Neo"), local("SpoqaHanSansNeo-Regular"), url("/fonts/SpoqaHanSansNeo_all/SpoqaHanSansNeo_TTF_original/SpoqaHanSansNeo-Thin.ttf") format("truetype");
+    src: local("Spoqa Han Sans Neo"), local("SpoqaHanSansNeo-Regular"), url("/fonts/SpoqaHanSansNeo_all/SpoqaHanSansNeo_TTF_original/SpoqaHanSansNeo-Regular.ttf") format("truetype");
     font-weight: 400;
     font-style: normal;
     font-display: swap;
@@ -516,6 +516,15 @@ body {
      pages — the HTML lang attribute is set in `app/root.tsx`. */
   html[lang="ko"], body[lang="ko"] {
     font-family: SpoqaHanSansNeo, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* Ensure English words inside the language selector retain the Montserrat font
+     when the site is served with lang="ko" (Korean). This targets any element
+     with the class `montserrat-for-en`. Placed here so it overrides the
+     global Korean font stack applied above. */
+  html[lang="ko"] .montserrat-for-en,
+  body[lang="ko"] .montserrat-for-en {
+    font-family: Montserrat, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
 
 /* Global parallax helpers */

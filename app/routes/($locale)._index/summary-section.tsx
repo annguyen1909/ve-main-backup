@@ -8,10 +8,11 @@ import {
   useState,
 } from "react";
 import { AppContext } from "~/root";
+import { montserratIfKo } from "~/lib/utils";
 
 const SummarySection = forwardRef<HTMLElement>((props, forwardedRef) => {
   const ref = useRef<HTMLElement>(null);
-  const { translations } = useOutletContext<AppContext>();
+  const { translations, locale } = useOutletContext<AppContext>();
   const inView = useInView(ref, { amount: 1 });
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
@@ -229,11 +230,24 @@ const SummarySection = forwardRef<HTMLElement>((props, forwardedRef) => {
           {/* left list (desktop) - hidden on small screens */}
           <div className="md:col-span-5 col-span-12 h-full hidden md:flex md:flex-col justify-between md:self-end md:relative order-2 md:order-1">
             <div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight">
-                {(translations as Record<string, string>)[
-                  "home.summary.services"
-                ] ?? "SERVICES"}
-              </h2>
+              {
+                // ensure English words like "SERVICES" render with Montserrat on Korean pages
+                (() => {
+                  const svc = (translations as Record<string, string>)["home.summary.services"] ?? "SERVICE";
+                  if (locale === 'ko' && /[A-Za-z]/.test(svc)) {
+                    return (
+                      <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight">
+                        <span className="montserrat-for-en">{svc}</span>
+                      </h2>
+                    );
+                  }
+                  return (
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight">
+                      {svc}
+                    </h2>
+                  );
+                })()
+              }
             </div>
             <div className="space-y-2 md:space-y-4">
               {categories.map((label, i) => (
@@ -287,7 +301,7 @@ const SummarySection = forwardRef<HTMLElement>((props, forwardedRef) => {
                         selected === i || hovered === i
                           ? "text-white/100"
                           : "text-white/60"
-                      }`}
+                      } ${montserratIfKo(label, locale)}`}
                       style={{
                         fontFamily: "'Gilroy', sans-serif",
                         letterSpacing: "-0.44px",
@@ -394,7 +408,7 @@ const SummarySection = forwardRef<HTMLElement>((props, forwardedRef) => {
                     ‹
                   </button>
 
-                  <div className="mx-3 px-4 py-2 rounded-full bg-black/60 backdrop-blur-sm text-white text-sm flex items-center gap-3 min-w-[120px] justify-center">
+                  <div className={`mx-3 px-4 py-2 rounded-full bg-black/60 backdrop-blur-sm text-white text-sm flex items-center gap-3 min-w-[120px] justify-center ${montserratIfKo(categories[visibleIndex] ?? "", locale)}`}>
                     <span className="font-medium truncate">
                       {categories[visibleIndex] ?? ""}
                     </span>

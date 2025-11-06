@@ -8,7 +8,7 @@ import {
 import { ArrowRight } from "lucide-react";
 import * as motion from "motion/react-client";
 import { Api } from "~/lib/api";
-import { cn, localePath, title } from "~/lib/utils";
+import { cn, localePath, title, montserratIfKo } from "~/lib/utils";
 import { AppContext } from "~/root";
 import { useTranslation } from "react-i18next";
 import type { loader as rootLoader } from "~/root";
@@ -173,9 +173,9 @@ export default function Works() {
                   </p>
                   <Link
                     to={localePath(locale, "/works/image")}
-                    className="hidden lg:inline-flex items-center text-xl text-white/80 font-light mt-7"
+                    className={`hidden lg:inline-flex items-center text-xl text-white/80 font-light mt-7`}
                   >
-                    {isKoreanLocale ? "작업 보기" : t["See works"]} <ArrowRight className="size-3 ml-1" />
+                    See Works <ArrowRight className="size-3 ml-1" />
                   </Link>
                 </div>
               </div>
@@ -227,9 +227,9 @@ export default function Works() {
                   </p>
                   <Link
                     to={localePath(locale, "/works/cinematic")}
-                    className="hidden lg:inline-flex items-center text-xl text-white/80 font-light mt-7"
+                    className={`hidden lg:inline-flex items-center text-xl text-white/80 font-light mt-7`}
                   >
-                    {isKoreanLocale ? "회사 소개 보기" : t["See works"]} <ArrowRight className="size-3 ml-1" />
+                    See Works<ArrowRight className="size-3 ml-1" />
                   </Link>
                 </div>
               </div>

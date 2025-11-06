@@ -1,6 +1,6 @@
 "use client";
 
-import { animate, useMotionValue } from "framer-motion";
+import { animate, useMotionValue, motion } from "framer-motion";
 import { useEffect } from "react";
 // no outlet context required for this component
 
@@ -60,15 +60,25 @@ export default function LoadingCounter({ onFinish }: LoadingCounterProps) {
           >
             <style>{`
               .fill { fill: #fff }
-              /* mask rect starts translated down (hidden) and moves up to reveal */
-              .mask-rect { transform-box: fill-box; transform: translateY(100%); animation: mask-up 1000ms ease forwards 300ms }
-              @keyframes mask-up { to { transform: translateY(0%); } }
+              /* fallback style in case JS animation doesn't run */
+              .mask-fallback { transform-box: fill-box; transform-origin: 50% 100%; }
             `}</style>
 
             <defs>
               <mask id="revealMask">
                 <rect x="0" y="0" width="100%" height="100%" fill="black" />
-                <rect className="mask-rect" x="0" y="0" width="100%" height="100%" fill="white" />
+                  {/* Use Framer Motion to animate the mask rect for consistent behavior on reload */}
+                  <motion.rect
+                    className="mask-fallback"
+                    x="0"
+                    y="0"
+                    width="100%"
+                    height="100%"
+                    fill="white"
+                    initial={{ translateY: "100%" }}
+                    animate={{ translateY: "0%" }}
+                    transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+                  />
               </mask>
             </defs>
 

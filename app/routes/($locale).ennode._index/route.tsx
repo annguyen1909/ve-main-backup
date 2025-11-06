@@ -1,7 +1,7 @@
 import { Link, MetaFunction, useOutletContext } from "@remix-run/react"
 import { ArrowRight } from "lucide-react";
 import { Container } from "~/components/ui/container";
-import { cn, localePath, title } from "~/lib/utils";
+import { cn, localePath, title, montserratIfKo } from "~/lib/utils";
 import { AppContext } from "~/root"
 import type { loader as rootLoader } from "~/root";
 
@@ -31,7 +31,7 @@ export default function Ennode() {
             <Link to={localePath(locale, 'about')} className="inline-block text-5xl xl:text-6xl font-semibold text-white uppercase drop-shadow group-hover:mb-2 duration-300">{t['ennode.arc.title']}</Link>
             <div className="opacity-0 group-hover:opacity-100 duration-300 translate-y-4 group-hover:translate-y-0">
               <p className="font-light text-base sm:text-lg md:text-xl xl:text-2xl 2xl:text-3xl mb-2">{t['ennode.arc.description']}</p>
-              <Link to={localePath(locale, 'about')} className="inline-flex items-center font-light text-base sm:text-lg md:text-xl text-white/80 mt-7">{t["See service"]} <ArrowRight className="size-3 ml-1" /></Link>
+              <Link to={localePath(locale, 'about')} className={`inline-flex items-center font-light text-base sm:text-lg md:text-xl text-white/80 mt-7 ${montserratIfKo(t["See service"] as string, locale)}`}>{t["See service"]} <ArrowRight className="size-3 ml-1" /></Link>
             </div>
           </div>
 
@@ -39,7 +39,7 @@ export default function Ennode() {
             <Link to={localePath(locale, 'ennode/digital')} className="inline-block text-5xl xl:text-6xl font-semibold text-white uppercase drop-shadow group-hover:mb-2 duration-300">{t['ennode.digital.title']}</Link>
             <div className="opacity-0 group-hover:opacity-100 duration-300 translate-y-4 group-hover:translate-y-0">
               <p className="font-light text-base sm:text-lg md:text-xl xl:text-2xl 2xl:text-3xl mb-2">{t['ennode.digital.description']}</p>
-              <Link to={localePath(locale, 'ennode/digital')} className="inline-flex items-center font-light text-base sm:text-lg md:text-xl text-white/80 mt-7">{t["See service"]} <ArrowRight className="size-3 ml-1" /></Link>
+              <Link to={localePath(locale, 'ennode/digital')} className={`inline-flex items-center font-light text-base sm:text-lg md:text-xl text-white/80 mt-7 ${montserratIfKo(t["See service"] as string, locale)}`}>{t["See service"]} <ArrowRight className="size-3 ml-1" /></Link>
             </div>
           </div>
         </div>

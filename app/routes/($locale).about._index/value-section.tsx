@@ -2,9 +2,10 @@ import { useOutletContext } from "@remix-run/react";
 import { forwardRef } from "react";
 import { Container } from "~/components/ui/container";
 import { AppContext } from "~/root";
+import { montserratIfKo } from "~/lib/utils";
 
 const ValueSection = forwardRef<HTMLElement>((props, ref) => {
-  const { translations: t } = useOutletContext<AppContext>();
+  const { translations: t, locale } = useOutletContext<AppContext>();
 
   return (
     <section
@@ -34,10 +35,10 @@ const ValueSection = forwardRef<HTMLElement>((props, ref) => {
               ))}
               <div className="w-9/12 bg-[url(/images/sign.png)] bg-no-repeat bg-contain aspect-[3/1] pointer-events-none"></div>
               <span
-                className="text-lg sm:text-[25px] font-extrabold mt-14 block"
+                className={`text-lg sm:text-[25px] font-extrabold mt-14 block ${montserratIfKo(t["STORY MAKE VALUE"] as string, locale)}`}
                 data-koreanable
               >
-                “ {t["STORY MAKE VALUE"]} ”
+                " {t["STORY MAKE VALUE"]} "
               </span>
             </div>
           </Container>

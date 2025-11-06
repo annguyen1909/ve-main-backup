@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select"
-import { cn, title } from "~/lib/utils";
+import { cn, title, montserratIfKo } from "~/lib/utils";
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const api = new Api();
@@ -51,7 +51,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   data.append("cv", cv);
   data.append("portfolio", portfolio);
   data.append("comment", comment);
-  
+
 
   return await api.sendEmailCVApi(data, locale)
     .then(async () => {
@@ -139,7 +139,7 @@ export default function Career() {
       console.warn(`Unexpected file input name: ${name}`);
       return;
     }
-  
+
     setFiles((prevFiles) => ({ ...prevFiles, [name]: file }));
   };
 
@@ -154,10 +154,10 @@ export default function Career() {
           alt={brand.description}
           className={"w-20 mb-10 lg:w-32 lg:mb-14"}
         />
-        <h3 className="text-[#bcbcbc] text-center font-semibold text-3xl md:text-5xl mb-2 md:mb-5">{t['Thank you for your information']}</h3>
+        <h3 className={`text-[#bcbcbc] text-center font-semibold text-3xl md:text-5xl mb-2 md:mb-5 ${montserratIfKo(t['Thank you for your information'], locale)}`}>{t['Thank you for your information']}</h3>
         <p className="text-[#959595] text-xl md:text-3xl font-light text-center"><span className="md:block">{t['We have received your information,']}</span> {t['we will contact with you soon']}</p>
       </div>
-      
+
       <div className="flex items-center justify-center">
         <div className="inline-flex items-center text-[#959595]">
           <span className="text-xl mr-4 md:text-3xl md:mr-7">{t['See us at']}</span>
@@ -256,14 +256,14 @@ export default function Career() {
                 </SelectContent>
               </Select> */}
 
-              <Select defaultValue="vietnam" name="nationality">
+              <Select defaultValue="korea" name="nationality">
                 <SelectTrigger className="w-full text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="w-full text-white bg-black !border-none">
                   <SelectGroup>
-                    <SelectItem value="vietnam">Vietnam</SelectItem>
                     <SelectItem value="korea">Korea</SelectItem>
+                    <SelectItem value="vietnam">Vietnam</SelectItem>
                     <SelectItem value="usa">The United States</SelectItem>
                     <SelectItem value="canada">Canada</SelectItem>
                   </SelectGroup>
@@ -296,7 +296,7 @@ export default function Career() {
               {t['career.form.cv']} <span className="text-red-600">*</span>
             </div>
             <div className="grow w-full flex flex-col gap-1">
-            <UploadInput id="cv" name="cv" onFileSelect={handleFileSelect} />
+              <UploadInput id="cv" name="cv" onFileSelect={handleFileSelect} />
             </div>
           </div>
 
@@ -313,11 +313,11 @@ export default function Career() {
           </div>
 
           <div className="flex items-center justify-center mt-14 text-white">
-            <button type="submit" className="border-2 hover:bg-white hover:text-[#1b1b1b] border-white uppercase bg-transparent px-3 py-2 font-medium text-2xl">{t['career.form.submit']}</button>
+            <button type="submit" className={`border-2 hover:bg-white hover:text-[#1b1b1b] border-white uppercase bg-transparent px-3 py-2 font-medium text-2xl ${montserratIfKo(t['career.form.submit'], locale)}`}>{t['career.form.submit']}</button>
           </div>
         </Form>
       </Container>
-  {/* Footer removed per request */}
+      {/* Footer removed per request */}
     </section >
   </div>
 }
