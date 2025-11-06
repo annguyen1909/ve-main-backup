@@ -143,7 +143,7 @@ const HeroSection = forwardRef<HTMLElement, HeroSectionProps>((props, ref) => {
               })()}
             </motion.h1>
             <motion.p
-              className="text-base sm:text-base md:text-lg lg:text-xl text-gray-200 max-w-sm sm:max-w-xl leading-relaxed font-light px-4 sm:px-0 sm:ml-12 mb-8 sm:mb-0"
+              className="text-base sm:text-base md:text-lg lg:text-xl text-gray-200 max-w-sm sm:max-w-2xl leading-relaxed font-light px-4 sm:px-0 sm:ml-12 mb-8 sm:mb-0"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: HERO_SUB_DELAY }}

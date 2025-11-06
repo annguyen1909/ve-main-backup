@@ -151,10 +151,10 @@ export function groupWorksByProject(works: WorkResource[]): OrganizedProject[] {
     const priorityA = getProjectPriority(a.project.title);
     const priorityB = getProjectPriority(b.project.title);
     
-    // If both have priority, sort by priority number
-    if (priorityA !== null && priorityB !== null) {
-      return priorityA - priorityB;
-    }
+      // If both have priority, sort by priority number (invert so higher number = higher priority)
+      if (priorityA !== null && priorityB !== null) {
+        return priorityB - priorityA;
+      }
     
     // If only one has priority, prioritized one comes first
     if (priorityA !== null && priorityB === null) return -1;

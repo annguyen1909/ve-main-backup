@@ -10,6 +10,7 @@ export function ContactCtaSection(props: {
     translations: props.externalTranslations,
     locale: props.externalLocale,
   };
+  const column2Body = t?.["component.contact.column_2.body"] as string | undefined;
 
   return (
     <div className="flex flex-col lg:flex-row lg:items-stretch text-white gap-14">
@@ -97,7 +98,11 @@ export function ContactCtaSection(props: {
           {t["component.contact.column_2.title"]}
         </p>
         <div className="font-extralight text-sm sm:text-base leading-7 h-full flex flex-col">
-          <p data-koreanable>{t["component.contact.column_2.body"]}</p>
+          {(column2Body ?? "").split(/\r?\n/).map((line, i) => (
+            <p key={i} data-koreanable className={i === 0 ? undefined : "mt-2"}>
+              {line}
+            </p>
+          ))}
           <p className="mt-auto">
             <span data-koreanable>{t["component.contact.column_2.cta"]}</span>:{" "}
             <Link

@@ -103,6 +103,7 @@ export default function Career() {
   const actionData = useActionData<typeof action>();
   const formRef = useRef<HTMLFormElement>(null);
   const { translations: t, brand, locale } = useOutletContext<AppContext>();
+  const careerBlurb = t?.["We always looking for potential designers so don't hesitate to send us your portfolio and CV."] as string | undefined;
   const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
   const [success, setSuccess] = useState(false);
 
@@ -185,7 +186,11 @@ export default function Career() {
       <Container variant={"md"} className="!py-20">
         <div>
           <p className="font-medium text-xl mb-7 text-white" data-koreanable>{t['Current openning']}</p>
-          <p className="text-base font-extralight leading-loose text-white" data-koreanable>{t['We always looking for potential designers so don\'t hesitate to send us your portfolio and CV.']}</p>
+          {(careerBlurb ?? "").split(/\r?\n/).map((line, i) => (
+            <p key={i} className={`text-base font-extralight leading-loose text-white ${i === 0 ? "" : "mt-0"}`} data-koreanable>
+              {line}
+            </p>
+          ))}
         </div>
 
         <h1 className="text-3xl font-medium my-14 text-white" data-koreanable>{t['career.form.title']}</h1>

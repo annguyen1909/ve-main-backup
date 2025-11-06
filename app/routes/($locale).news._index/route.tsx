@@ -79,7 +79,7 @@ export default function Index() {
         >
           <div className="text-center mt-14 mb-2">
             <h3
-              className="font-semibold text-3xl sm:text-4xl md:text-5xl uppercase text-white mb-2"
+              className={`font-semibold text-3xl sm:text-4xl md:text-5xl uppercase text-white mb-2 ${montserratIfKo("New update", locale)}`}
               data-koreanable
             >
               {t["New update"]}
