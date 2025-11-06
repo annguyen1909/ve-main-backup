@@ -100,6 +100,13 @@ export default function Index() {
     setTotalSections(totalSections);
   };
 
+  // If we're on the Korean locale we hide the loading overlay elsewhere
+  // so mark the page as loaded immediately so UI elements that depend on
+  // `loaded` (like ScrollProgress) render as expected.
+  useEffect(() => {
+    if (locale === "ko") setLoaded(true);
+  }, [locale]);
+
   useEffect(() => {
     if (loaded) return;
 
@@ -181,23 +188,21 @@ export default function Index() {
         )}
       </AnimatePresence>
 
-      {/* Progress Bar - only show when loaded */}
-      {loaded && (
-        <ScrollProgress
-          currentIndex={currentSection}
-          totalSections={totalSections}
-          className="z-40"
-          labels={[
-            "Home",
-            "Services",
-            "Works",
-            "Clients",
-            "Process",
-            "News",
-            "Contact",
-          ]}
-        />
-      )}
+      {/* Progress Bar - always show (hidden on small screens by the component's CSS) */}
+      <ScrollProgress
+        currentIndex={currentSection}
+        totalSections={totalSections}
+        className="z-40"
+        labels={[
+          "Home",
+          "Services",
+          "Works",
+          "Clients",
+          "Process",
+          "News",
+          "Contact",
+        ]}
+      />
 
       <div className={locale === "ko" ? "ko-solid" : ""}>
         <SmoothScrollLayout onIndexChange={handleIndexChange}>

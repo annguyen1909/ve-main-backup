@@ -48,7 +48,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 
 export default function NewsDetailPage() {
   const { news } = useLoaderData<typeof loader>();
-  useOutletContext<AppContext>();
+  const { locale } = useOutletContext<AppContext>();
   // -- Helpers: small fallback renderer for TipTap JSON docs
   function escapeHtml(str: string) {
     return String(str)
@@ -197,7 +197,11 @@ export default function NewsDetailPage() {
           style={{ backgroundImage: `url(${news.attachment_url})` }}
         >
           <div className="bg-gradient-to-t from-[#1b1b1b]/0 to-[#1b1b1b] absolute inset-0"></div>
-          <Container className="relative" variant="lg">
+      <Container
+        className="relative"
+        variant="lg"
+        style={locale === "ko" ? { fontFamily: '"VeKoTest-Spoqa", "SpoqaHanSansNeo", sans-serif' } : undefined}
+      >
             <span className="text-white font-extralight text-xs mb-5 xl:mb-7 inline-block">
               {new Date(news.published_at).toLocaleDateString("vi-VN", {
                 month: "2-digit",
@@ -215,6 +219,7 @@ export default function NewsDetailPage() {
           className="prose prose-invert prose-md py-7 sm:py-14 xl:py-20"
           data-koreanable
           variant="lg"
+          style={locale === "ko" ? { fontFamily: '"VeKoTest-Spoqa", "SpoqaHanSansNeo", sans-serif' } : undefined}
           dangerouslySetInnerHTML={{ __html: contentHtml }}
         />
       </section>

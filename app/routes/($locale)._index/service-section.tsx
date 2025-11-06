@@ -216,6 +216,9 @@ const ServiceSection = forwardRef<HTMLElement>((props, forwardedRef) => {
     return <>{text}</>;
   };
 
+  const serviceDescription = (t as Record<string, string>)["home.service.description"] ??
+    "Explore the impressive portfolio of Our 3D Rendering Company to see how VISUAL ENNODE brings architectural visions to life with precision and creativity. Dive into our projects to experience the high-quality visualizations that set us apart.";
+
   function openModal(url: string) {
     setModalUrl(url);
     // allow mount then trigger visibility for CSS transition
@@ -294,9 +297,17 @@ const ServiceSection = forwardRef<HTMLElement>((props, forwardedRef) => {
               </>
             )}
           </h2>
-          <p className="mt-3 sm:mt-4 max-w-[68rem] text-base sm:text-lg md:text-xl text-white/80 leading-relaxed">
-            {(t as Record<string,string>)["home.service.description"] ?? "Explore the impressive portfolio of Our 3D Rendering Company to see how VISUAL ENNODE brings architectural visions to life with precision and creativity. Dive into our projects to experience the high-quality visualizations that set us apart."}
-          </p>
+          {
+            // split first on explicit newlines, then further split sentences at period+space
+            (serviceDescription ?? "").split(/\r?\n/).flatMap(s => s.split(/(?<=\.)\s+/)).map((line, i) => (
+              <p
+                key={i}
+                className={`${i === 0 ? 'mt-3 sm:mt-4' : 'mt-2'} max-w-[68rem] text-base sm:text-lg md:text-xl text-white/80 leading-relaxed`}
+              >
+                {line}
+              </p>
+            ))
+          }
         </div>
       </div>
 

@@ -44,7 +44,7 @@ export const localizedItems: Record<string, WorkProcessItem[]> = {
     },
     {
       title: "작업 기획",
-      subtitles: ["프로젝트 컨셉 기획, 3D 작업"],
+      subtitles: ["프로젝트 컨셉 기획", "3D 작업"],
     },
     {
       title: "시안 공유 및 수정",
