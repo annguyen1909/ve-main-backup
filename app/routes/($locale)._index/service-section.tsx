@@ -298,15 +298,22 @@ const ServiceSection = forwardRef<HTMLElement>((props, forwardedRef) => {
             )}
           </h2>
           {
-            // split first on explicit newlines, then further split sentences at period+space
-            (serviceDescription ?? "").split(/\r?\n/).flatMap(s => s.split(/(?<=\.)\s+/)).map((line, i) => (
-              <p
-                key={i}
-                className={`${i === 0 ? 'mt-3 sm:mt-4' : 'mt-2'} max-w-[68rem] text-base sm:text-lg md:text-xl text-white/80 leading-relaxed`}
-              >
-                {line}
+            // Only split into multiple paragraphs for Korean locale. Other locales render as single paragraph.
+            locale === 'ko' ? (
+              // split first on explicit newlines, then further split sentences at period+space
+              (serviceDescription ?? "").split(/\r?\n/).flatMap((s) => s.split(/(?<=\.)\s+/)).map((line, i) => (
+                <p
+                  key={i}
+                  className={`${i === 0 ? 'mt-3 sm:mt-4' : 'mt-2'} max-w-[68rem] text-base sm:text-lg md:text-xl text-white/80 leading-relaxed`}
+                >
+                  {line}
+                </p>
+              ))
+            ) : (
+              <p className="mt-3 sm:mt-4 max-w-[68rem] text-base sm:text-lg md:text-xl text-white/80 leading-relaxed">
+                {serviceDescription}
               </p>
-            ))
+            )
           }
         </div>
       </div>
