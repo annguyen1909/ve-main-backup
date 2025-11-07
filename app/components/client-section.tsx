@@ -12,7 +12,7 @@ interface ClientSectionProps {
 const ClientSection = forwardRef<HTMLElement, ClientSectionProps>(
   (props, forwardedRef) => {
     const ref = useRef<HTMLElement>(null);
-  const { translations: t, locale } = useOutletContext<AppContext>();
+    const { translations: t } = useOutletContext<AppContext>();
     const inView = useInView(ref, { amount: 1 });
 
     const clients = Array.isArray(props.clients) ? props.clients : [];
@@ -36,7 +36,7 @@ const ClientSection = forwardRef<HTMLElement, ClientSectionProps>(
         <Container className="flex-none m-auto min-h-full flex flex-col w-full px-4 sm:px-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:mt-14 mb-4 sm:mb-6">
             <div>
-              <h2 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight uppercase ${locale === 'ko' ? 'text-center' : ''}`}>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight uppercase text-center">
               {/**
                * Render translation with `||` markers used to indicate highlighted segments.
                * Example in common.json: "Our team is dedicated to building ||strong, longlasting relationships|| with our partners." 

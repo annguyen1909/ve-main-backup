@@ -133,22 +133,21 @@ const ServiceSection = forwardRef<HTMLElement>((props, forwardedRef) => {
     { rowSpan: 3 }, // accent
   ];
 
-  // explicit client-side image list (place files in public/images/)
   const imgs = [
-    "/images/hero-1.jpg",
-    "/images/hero-2.jpg",
-    "/images/hero-3.jpg",
-    "/images/hero-4.jpg",
-    "/images/hero-5.jpg",
-    "/images/hero-1.jpg",
-    "/images/hero-2.jpg",
-    "/images/hero-3.jpg",
-    "/images/hero-3.jpg",
-    "/images/hero-1.jpg",
-    "/images/hero-2.jpg",
-    "/images/hero-3.jpg",
-    "/images/hero-3.jpg",
-    "/images/hero-1.jpg",
+    "/images/tiles/tile-01.jpg",
+    "/images/tiles/tile-02.jpg",
+    "/images/tiles/tile-03.jpg",
+    "/images/tiles/tile-04.jpg",
+    "/images/tiles/tile-05.jpg",
+    "/images/tiles/tile-06.jpg",
+    "/images/tiles/tile-07.jpg",
+    "/images/tiles/tile-08.jpg",
+    "/images/tiles/tile-09.jpg",
+    "/images/tiles/tile-10.jpg",
+    "/images/tiles/tile-11.jpg",
+    "/images/tiles/tile-12.jpg",
+    "/images/tiles/tile-13.jpg",
+    "/images/tiles/tile-14.jpg",
   ];
 
   // Force local images by default. To explicitly use server banners, pass ?useServerBanners=1
@@ -372,6 +371,10 @@ const ServiceSection = forwardRef<HTMLElement>((props, forwardedRef) => {
 
               const scale = isHovered ? 1.15 : isHeadingHovered ? 1.05 : 1;
 
+              // Prioritize loading first 4 tiles (above fold) and reduce motion complexity
+              const isAboveFold = idx < 4;
+              const shouldReduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
               return (
                 <motion.button
                   data-tile-index={idx}
@@ -391,20 +394,20 @@ const ServiceSection = forwardRef<HTMLElement>((props, forwardedRef) => {
                   onBlur={() => lottieRefs.current[idx]?.pause?.()}
                   className={`relative overflow-hidden rounded-none bg-gray-800 block group transition-all duration-300`}
                   style={{ gridRowEnd: `span ${tile.rowSpan}` }}
-                  initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                  initial={shouldReduceMotion ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 30 }}
                   animate={
-                    hasAnimatedOnce
+                    hasAnimatedOnce || shouldReduceMotion
                       ? { opacity: 1, scale: 1, y: 0 }
                       : inView
                       ? { opacity: 1, scale: 1, y: 0 }
                       : { opacity: 0, scale: 0.9, y: 30 }
                   }
                   transition={
-                    hasAnimatedOnce
+                    hasAnimatedOnce || shouldReduceMotion
                       ? { duration: 0 }
                       : {
                           delay: delays[idx] ?? rowForThis * 0.12,
-                          duration: 0.8,
+                          duration: 0.6, // reduced from 0.8
                           ease: [0.22, 1, 0.36, 1],
                         }
                   }
@@ -416,20 +419,26 @@ const ServiceSection = forwardRef<HTMLElement>((props, forwardedRef) => {
                       transition: isHovered
                         ? "transform 0.2s ease-out"
                         : "transform 0.5s ease-out",
+                      willChange: isHovered ? "transform" : "auto", // hint browser to optimize
                     }}
                   >
                     <img
                       src={url}
                       alt={`work-${idx + 1}`}
-                      loading="lazy"
+                      loading={isAboveFold ? "eager" : "lazy"}
+                      decoding="async"
+                      fetchPriority={isAboveFold ? "high" : "auto"}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         if (target && target.src && !target.dataset.fallback) {
                           target.dataset.fallback = "1";
-                          target.src = "/images/visual-placeholder.webp";
+                          target.src = "/images/visual-placeholder.jpg";
                         }
                       }}
                       className="block w-full h-full object-cover"
+                      style={{
+                        contentVisibility: isAboveFold ? "auto" : "auto",
+                      }}
                     />
                   </div>
                   {/* per-tile gradient removed — using a single overlay for the whole mosaic */}
