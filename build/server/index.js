@@ -1556,7 +1556,10 @@ function GlobalParallax() {
 function LoadingCounter({ onFinish }) {
   const count = useMotionValue(0);
   const prefersReduced = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    let raf = 0;
+    raf = window.requestAnimationFrame(() => setMounted(true));
     if (typeof window === "undefined") return;
     const controls = animate(count, 100, { duration: 1.5, ease: "easeOut" });
     const unsubscribe = count.onChange((v) => {
@@ -1568,6 +1571,7 @@ function LoadingCounter({ onFinish }) {
     return () => {
       controls.stop();
       unsubscribe();
+      if (raf) window.cancelAnimationFrame(raf);
     };
   }, [count, onFinish, prefersReduced]);
   return /* @__PURE__ */ jsx(
@@ -1578,44 +1582,63 @@ function LoadingCounter({ onFinish }) {
       "aria-live": "polite",
       className: "flex items-center justify-center",
       style: { width: "100%", height: "100%" },
-      children: /* @__PURE__ */ jsx("div", { className: "relative w-96 h-96 sm:w-96 sm:h-96 select-none flex items-center justify-center", children: /* @__PURE__ */ jsxs(
-        "svg",
+      children: /* @__PURE__ */ jsx(
+        "div",
         {
-          xmlns: "http://www.w3.org/2000/svg",
-          viewBox: "0 0 907.09 748.35",
-          className: "w-48 h-48 md:w-80 md:h-80",
-          role: "img",
-          "aria-label": "logo",
-          children: [
-            /* @__PURE__ */ jsx("style", { children: `
+          className: "relative w-96 h-96 sm:w-96 sm:h-96 select-none flex items-center justify-center",
+          style: { visibility: mounted ? "visible" : "hidden" },
+          children: /* @__PURE__ */ jsxs(
+            "svg",
+            {
+              xmlns: "http://www.w3.org/2000/svg",
+              viewBox: "0 0 907.09 748.35",
+              className: "w-48 h-48 md:w-80 md:h-80",
+              role: "img",
+              "aria-label": "logo",
+              children: [
+                /* @__PURE__ */ jsx("style", { children: `
               .fill { fill: #fff }
               /* fallback style in case JS animation doesn't run */
               .mask-fallback { transform-box: fill-box; transform-origin: 50% 100%; }
             ` }),
-            /* @__PURE__ */ jsx("defs", { children: /* @__PURE__ */ jsxs("mask", { id: "revealMask", children: [
-              /* @__PURE__ */ jsx("rect", { x: "0", y: "0", width: "100%", height: "100%", fill: "black" }),
-              /* @__PURE__ */ jsx(
-                motion$1.rect,
-                {
-                  className: "mask-fallback",
-                  x: "0",
-                  y: "0",
-                  width: "100%",
-                  height: "100%",
-                  fill: "white",
-                  initial: { translateY: "100%" },
-                  animate: { translateY: "0%" },
-                  transition: { duration: 1, delay: 0.3, ease: "easeOut" }
-                }
-              )
-            ] }) }),
-            /* @__PURE__ */ jsxs("g", { mask: "url(#revealMask)", children: [
-              /* @__PURE__ */ jsx("polygon", { className: "fill", points: "373.32 650.33 448.15 423.18 800.59 423.18 800.59 325.16 480.44 325.16 555.27 98.02 693.47 98.02 693.47 0 506.15 0 506.15 0 467.33 0 290.05 538.12 288.53 542.99 288.49 542.86 228.41 725.22 236.03 748.35 341.03 748.35 341.03 748.35 907.71 748.35 907.71 650.33 373.32 650.33" }),
-              /* @__PURE__ */ jsx("polygon", { className: "fill", points: "168.5 542.36 228.42 350.23 119.2 0 -.63 0 168.5 542.36" })
-            ] })
-          ]
+                /* @__PURE__ */ jsx("defs", { children: /* @__PURE__ */ jsxs("mask", { id: "revealMask", children: [
+                  /* @__PURE__ */ jsx("rect", { x: "0", y: "0", width: "100%", height: "100%", fill: "black" }),
+                  /* @__PURE__ */ jsx(
+                    "rect",
+                    {
+                      className: "mask-fallback",
+                      x: "0",
+                      y: "0",
+                      width: "100%",
+                      height: "100%",
+                      fill: "white",
+                      style: { transform: "translateY(100%)" }
+                    }
+                  ),
+                  /* @__PURE__ */ jsx(
+                    motion$1.rect,
+                    {
+                      className: "mask-fallback",
+                      x: "0",
+                      y: "0",
+                      width: "100%",
+                      height: "100%",
+                      fill: "white",
+                      initial: { translateY: "100%" },
+                      animate: prefersReduced ? { translateY: "0%" } : { translateY: "0%" },
+                      transition: { duration: 1, ease: "easeOut" }
+                    }
+                  )
+                ] }) }),
+                /* @__PURE__ */ jsxs("g", { mask: "url(#revealMask)", children: [
+                  /* @__PURE__ */ jsx("polygon", { className: "fill", points: "373.32 650.33 448.15 423.18 800.59 423.18 800.59 325.16 480.44 325.16 555.27 98.02 693.47 98.02 693.47 0 506.15 0 506.15 0 467.33 0 290.05 538.12 288.53 542.99 288.49 542.86 228.41 725.22 236.03 748.35 341.03 748.35 341.03 748.35 907.71 748.35 907.71 650.33 373.32 650.33" }),
+                  /* @__PURE__ */ jsx("polygon", { className: "fill", points: "168.5 542.36 228.42 350.23 119.2 0 -.63 0 168.5 542.36" })
+                ] })
+              ]
+            }
+          )
         }
-      ) })
+      )
     }
   );
 }
@@ -5936,20 +5959,20 @@ const ServiceSection = forwardRef((props, forwardedRef) => {
     // accent
   ];
   const imgs = [
-    "/images/hero-1.jpg",
-    "/images/hero-2.jpg",
-    "/images/hero-3.jpg",
-    "/images/hero-4.jpg",
-    "/images/hero-5.jpg",
-    "/images/hero-1.jpg",
-    "/images/hero-2.jpg",
-    "/images/hero-3.jpg",
-    "/images/hero-3.jpg",
-    "/images/hero-1.jpg",
-    "/images/hero-2.jpg",
-    "/images/hero-3.jpg",
-    "/images/hero-3.jpg",
-    "/images/hero-1.jpg"
+    "/images/tiles/tile-01.jpg",
+    "/images/tiles/tile-02.jpg",
+    "/images/tiles/tile-03.jpg",
+    "/images/tiles/tile-04.jpg",
+    "/images/tiles/tile-05.jpg",
+    "/images/tiles/tile-06.jpg",
+    "/images/tiles/tile-07.jpg",
+    "/images/tiles/tile-08.jpg",
+    "/images/tiles/tile-09.jpg",
+    "/images/tiles/tile-10.jpg",
+    "/images/tiles/tile-11.jpg",
+    "/images/tiles/tile-12.jpg",
+    "/images/tiles/tile-13.jpg",
+    "/images/tiles/tile-14.jpg"
   ];
   const useServerBanners = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("useServerBanners") === "1";
   const tileImgs = useServerBanners && Array.isArray(banners) && banners.length > 0 ? banners.map((b) => b.url) : imgs;
@@ -6086,6 +6109,8 @@ const ServiceSection = forwardRef((props, forwardedRef) => {
               const moveX = isHovered ? mousePos.x * 20 : isHeadingHovered ? mousePos.x * 8 : 0;
               const moveY = isHovered ? mousePos.y * 20 : isHeadingHovered ? mousePos.y * 8 : 0;
               const scale = isHovered ? 1.15 : isHeadingHovered ? 1.05 : 1;
+              const isAboveFold = idx < 4;
+              const shouldReduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
               return /* @__PURE__ */ jsx(
                 motion$1.button,
                 {
@@ -6105,11 +6130,12 @@ const ServiceSection = forwardRef((props, forwardedRef) => {
                   onBlur: () => lottieRefs.current[idx]?.pause?.(),
                   className: `relative overflow-hidden rounded-none bg-gray-800 block group transition-all duration-300`,
                   style: { gridRowEnd: `span ${tile.rowSpan}` },
-                  initial: { opacity: 0, scale: 0.9, y: 30 },
-                  animate: hasAnimatedOnce ? { opacity: 1, scale: 1, y: 0 } : inView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 30 },
-                  transition: hasAnimatedOnce ? { duration: 0 } : {
+                  initial: shouldReduceMotion ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 30 },
+                  animate: hasAnimatedOnce || shouldReduceMotion ? { opacity: 1, scale: 1, y: 0 } : inView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 30 },
+                  transition: hasAnimatedOnce || shouldReduceMotion ? { duration: 0 } : {
                     delay: delays[idx] ?? rowForThis * 0.12,
-                    duration: 0.8,
+                    duration: 0.6,
+                    // reduced from 0.8
                     ease: [0.22, 1, 0.36, 1]
                   },
                   children: /* @__PURE__ */ jsx(
@@ -6118,22 +6144,29 @@ const ServiceSection = forwardRef((props, forwardedRef) => {
                       className: "w-full h-full",
                       style: {
                         transform: `translate(${moveX}px, ${moveY}px) scale(${scale})`,
-                        transition: isHovered ? "transform 0.2s ease-out" : "transform 0.5s ease-out"
+                        transition: isHovered ? "transform 0.2s ease-out" : "transform 0.5s ease-out",
+                        willChange: isHovered ? "transform" : "auto"
+                        // hint browser to optimize
                       },
                       children: /* @__PURE__ */ jsx(
                         "img",
                         {
                           src: url,
                           alt: `work-${idx + 1}`,
-                          loading: "lazy",
+                          loading: isAboveFold ? "eager" : "lazy",
+                          decoding: "async",
+                          fetchPriority: isAboveFold ? "high" : "auto",
                           onError: (e) => {
                             const target = e.target;
                             if (target && target.src && !target.dataset.fallback) {
                               target.dataset.fallback = "1";
-                              target.src = "/images/visual-placeholder.webp";
+                              target.src = "/images/visual-placeholder.jpg";
                             }
                           },
-                          className: "block w-full h-full object-cover"
+                          className: "block w-full h-full object-cover",
+                          style: {
+                            contentVisibility: isAboveFold ? "auto" : "auto"
+                          }
                         }
                       )
                     }
@@ -6617,7 +6650,7 @@ const route15 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: DebugOverflow
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const serverManifest = {'entry':{'module':'/assets/entry.client-C0dgAWPW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js'],'css':[]},'routes':{'root':{'id':'root','parentId':undefined,'path':'','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':true,'module':'/assets/root-DB28LDdh.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js','/assets/useTranslation-C2uTB0a1.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/index-BgzGjlS9.js','/assets/chevron-right-BxmQk4H8.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/loading-counter-C7EV_7Hk.js','/assets/elements-Dbp8aVoy.js','/assets/index-D3ZRcz1e.js','/assets/resolve-elements-WL2ErOKm.js'],'css':['/assets/root-5BMW_LtI.css']},'routes/($locale).ennode.digital._index':{'id':'routes/($locale).ennode.digital._index','parentId':'root','path':':locale?/ennode/digital','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CyQhggqy.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/carousel-9jwcCCO4.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js'],'css':[]},'routes/($locale).works.$category.$work':{'id':'routes/($locale).works.$category.$work','parentId':'routes/($locale).works.$category','path':':work','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-Bd1YvllV.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/Combination-Bn4r43AQ.js','/assets/index-BgzGjlS9.js','/assets/utils-tQ8evKDJ.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/icon-CP4mJMRx.js','/assets/i18n-DH-wL5Eu.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).ennode.arc._index':{'id':'routes/($locale).ennode.arc._index','parentId':'root','path':':locale?/ennode/arc','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CnigBhY1.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/team-section-CkguuTle.js','/assets/i18n-DH-wL5Eu.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js'],'css':[]},'routes/($locale).news.$slug._index':{'id':'routes/($locale).news.$slug._index','parentId':'root','path':':locale?/news/:slug','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BRkCHnmW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/utils-tQ8evKDJ.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works.$category':{'id':'routes/($locale).works.$category','parentId':'root','path':':locale?/works/:category','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BjgdLnI0.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).contact._index':{'id':'routes/($locale).contact._index','parentId':'root','path':':locale?/contact','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB-XYw2H.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/index-D3ZRcz1e.js','/assets/utils-tQ8evKDJ.js','/assets/icon-CP4mJMRx.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).career._index':{'id':'routes/($locale).career._index','parentId':'root','path':':locale?/career','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-D4fZkf_X.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/index-D3ZRcz1e.js','/assets/i18n-DH-wL5Eu.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/utils-tQ8evKDJ.js'],'css':[]},'routes/($locale).ennode._index':{'id':'routes/($locale).ennode._index','parentId':'root','path':':locale?/ennode','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-oJw-tJEK.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon-$name':{'id':'routes/($locale).favicon-$name','parentId':'root','path':':locale?/favicon-$name','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon-_name-CZ0Ns0X4.js','imports':[],'css':[]},'routes/($locale).about._index':{'id':'routes/($locale).about._index','parentId':'root','path':':locale?/about','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-7zsO4kyg.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/utils-tQ8evKDJ.js','/assets/process-section-Bc9sS8WA.js','/assets/team-section-CkguuTle.js','/assets/contact-section-B-y5Wsm-.js','/assets/carousel-9jwcCCO4.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works._index':{'id':'routes/($locale).works._index','parentId':'root','path':':locale?/works','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CTNqqIJh.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/i18n-DH-wL5Eu.js','/assets/useTranslation-C2uTB0a1.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/container-2TlAo-hG.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js','/assets/context-DOdfq747.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon.ico':{'id':'routes/($locale).favicon.ico','parentId':'root','path':':locale?/favicon/ico','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon.ico-l0sNRNKZ.js','imports':[],'css':[]},'routes/($locale).news._index':{'id':'routes/($locale).news._index','parentId':'root','path':':locale?/news','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB7MG7Cd.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/chevron-right-BxmQk4H8.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale)._index':{'id':'routes/($locale)._index','parentId':'root','path':':locale?','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DZPfIUsn.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/contact-section-B-y5Wsm-.js','/assets/loading-counter-C7EV_7Hk.js','/assets/process-section-Bc9sS8WA.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/resolve-elements-WL2ErOKm.js','/assets/contact-cta-section-BBuv_ViC.js'],'css':[]},'routes/debug.overflow':{'id':'routes/debug.overflow','parentId':'root','path':'debug/overflow','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/debug.overflow-C_wAp7uD.js','imports':['/assets/jsx-runtime-kF-aRxYe.js'],'css':[]}},'url':'/assets/manifest-540b9c87.js','version':'540b9c87'};
+const serverManifest = {'entry':{'module':'/assets/entry.client-C0dgAWPW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js'],'css':[]},'routes':{'root':{'id':'root','parentId':undefined,'path':'','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':true,'module':'/assets/root-yspHjS6W.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js','/assets/useTranslation-C2uTB0a1.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/index-BgzGjlS9.js','/assets/chevron-right-BxmQk4H8.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/loading-counter-DmiKNHUe.js','/assets/elements-Dbp8aVoy.js','/assets/index-D3ZRcz1e.js','/assets/resolve-elements-WL2ErOKm.js'],'css':['/assets/root-DM7ddGl_.css']},'routes/($locale).ennode.digital._index':{'id':'routes/($locale).ennode.digital._index','parentId':'root','path':':locale?/ennode/digital','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CyQhggqy.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/carousel-9jwcCCO4.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js'],'css':[]},'routes/($locale).works.$category.$work':{'id':'routes/($locale).works.$category.$work','parentId':'routes/($locale).works.$category','path':':work','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-Bd1YvllV.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/Combination-Bn4r43AQ.js','/assets/index-BgzGjlS9.js','/assets/utils-tQ8evKDJ.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/icon-CP4mJMRx.js','/assets/i18n-DH-wL5Eu.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).ennode.arc._index':{'id':'routes/($locale).ennode.arc._index','parentId':'root','path':':locale?/ennode/arc','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CnigBhY1.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/team-section-CkguuTle.js','/assets/i18n-DH-wL5Eu.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js'],'css':[]},'routes/($locale).news.$slug._index':{'id':'routes/($locale).news.$slug._index','parentId':'root','path':':locale?/news/:slug','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BRkCHnmW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/utils-tQ8evKDJ.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works.$category':{'id':'routes/($locale).works.$category','parentId':'root','path':':locale?/works/:category','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BjgdLnI0.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).contact._index':{'id':'routes/($locale).contact._index','parentId':'root','path':':locale?/contact','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB-XYw2H.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/index-D3ZRcz1e.js','/assets/utils-tQ8evKDJ.js','/assets/icon-CP4mJMRx.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).career._index':{'id':'routes/($locale).career._index','parentId':'root','path':':locale?/career','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-D4fZkf_X.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/index-D3ZRcz1e.js','/assets/i18n-DH-wL5Eu.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/utils-tQ8evKDJ.js'],'css':[]},'routes/($locale).ennode._index':{'id':'routes/($locale).ennode._index','parentId':'root','path':':locale?/ennode','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-oJw-tJEK.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon-$name':{'id':'routes/($locale).favicon-$name','parentId':'root','path':':locale?/favicon-$name','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon-_name-CZ0Ns0X4.js','imports':[],'css':[]},'routes/($locale).about._index':{'id':'routes/($locale).about._index','parentId':'root','path':':locale?/about','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-7zsO4kyg.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/utils-tQ8evKDJ.js','/assets/process-section-Bc9sS8WA.js','/assets/team-section-CkguuTle.js','/assets/contact-section-B-y5Wsm-.js','/assets/carousel-9jwcCCO4.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works._index':{'id':'routes/($locale).works._index','parentId':'root','path':':locale?/works','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CTNqqIJh.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/i18n-DH-wL5Eu.js','/assets/useTranslation-C2uTB0a1.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/container-2TlAo-hG.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js','/assets/context-DOdfq747.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon.ico':{'id':'routes/($locale).favicon.ico','parentId':'root','path':':locale?/favicon/ico','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon.ico-l0sNRNKZ.js','imports':[],'css':[]},'routes/($locale).news._index':{'id':'routes/($locale).news._index','parentId':'root','path':':locale?/news','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB7MG7Cd.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/chevron-right-BxmQk4H8.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale)._index':{'id':'routes/($locale)._index','parentId':'root','path':':locale?','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-voGDrq99.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/contact-section-B-y5Wsm-.js','/assets/loading-counter-DmiKNHUe.js','/assets/process-section-Bc9sS8WA.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/resolve-elements-WL2ErOKm.js','/assets/contact-cta-section-BBuv_ViC.js'],'css':[]},'routes/debug.overflow':{'id':'routes/debug.overflow','parentId':'root','path':'debug/overflow','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/debug.overflow-C_wAp7uD.js','imports':['/assets/jsx-runtime-kF-aRxYe.js'],'css':[]}},'url':'/assets/manifest-147a91a5.js','version':'147a91a5'};
 
 /**
        * `mode` is only relevant for the old Remix compiler but

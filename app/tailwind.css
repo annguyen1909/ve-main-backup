@@ -50,7 +50,7 @@ body {
   @font-face {
     font-family: SpoqaHanSansNeo;
     /* fix: directory name is "SpoqaHanSansNeo_TTF_original" (typo earlier) */
-    src: local("Spoqa Han Sans Neo"), local("SpoqaHanSansNeo-Regular"), url("/fonts/SpoqaHanSansNeo_all/SpoqaHanSansNeo_TTF_original/SpoqaHanSansNeo-Regular.ttf") format("truetype");
+    src: local("Spoqa Han Sans Neo"), local("SpoqaHanSansNeo-Regular"), url("/fonts/SpoqaHanSansNeo_all/SpoqaHanSansNeowoff2/SpoqaHanSansNeo.woff2") format("truetype");
     font-weight: 400;
     font-style: normal;
     font-display: swap;

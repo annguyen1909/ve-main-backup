@@ -142,7 +142,7 @@ export default function Works() {
               opacity: 1,
               x: 0,
             }}
-            fetchPriority="high"
+            {...{ fetchpriority: "high" }}
             onLoad={handeLoadImage}
             exit={{ opacity: 0 }}
           />

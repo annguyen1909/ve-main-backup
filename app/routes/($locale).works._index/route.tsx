@@ -136,7 +136,7 @@ export default function Works() {
               loop
               preload="auto"
               className={cn(
-                "absolute p-6 md:p-0 inset-0 object-cover h-dvh w-full max-h-dvh"
+                "absolute p-0 md:p-0 inset-0 object-cover h-dvh w-full max-h-dvh"
               )}
             >
               <source src={imageCategory.attachment_url} type="video/mp4" />
@@ -191,7 +191,7 @@ export default function Works() {
               loop
               preload="auto"
               className={cn(
-                "absolute p-6 md:p-0 inset-0 object-cover h-dvh w-full max-h-dvh"
+                "absolute p-0 md:p-0 inset-0 object-cover h-dvh w-full max-h-dvh"
               )}
             >
               <source src={cinematicCategory.attachment_url} type="video/mp4" />
@@ -240,7 +240,7 @@ export default function Works() {
 
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-[12%] bg-gradient-to-b from-transparent to-[#1b1b1b] pointer-events-none z-10"
+        className="absolute inset-x-0 bottom-0 h-[12%] bg-gradient-to-b from-transparent to-[#1b1b1b] pointer-events-none z-10 max-md:hidden"
       />
 
       <ContactSection />

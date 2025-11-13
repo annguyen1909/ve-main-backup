@@ -1,7 +1,7 @@
 "use client";
 
 import { animate, useMotionValue, motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 // no outlet context required for this component
 
 type LoadingCounterProps = {
@@ -22,12 +22,22 @@ export default function LoadingCounter({ onFinish }: LoadingCounterProps) {
     window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // Control initial visibility: keep the SVG hidden until the component mounts
+  // so we don't flash the logo before the masked animation runs.
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    // ensure we mark mounted on the next animation frame so the DOM has applied
+    // initial styles (hidden) before we reveal/animate. This prevents an
+    // instantaneous unmasked render on some browsers during hydration.
+    let raf = 0;
+    raf = window.requestAnimationFrame(() => setMounted(true));
+
     if (typeof window === "undefined") return;
 
     // animate count from 0 to 100 (slower for a longer load feel)
     const controls = animate(count, 100, { duration: 1.5, ease: "easeOut" });
-    const unsubscribe = count.onChange((v) => {
+    const unsubscribe = count.on("change", (v) => {
       if (v >= 100) {
         onFinish?.();
         controls.stop();
@@ -36,6 +46,7 @@ export default function LoadingCounter({ onFinish }: LoadingCounterProps) {
     return () => {
       controls.stop();
       unsubscribe();
+      if (raf) window.cancelAnimationFrame(raf);
     };
   }, [count, onFinish, prefersReduced]);
 
@@ -48,7 +59,13 @@ export default function LoadingCounter({ onFinish }: LoadingCounterProps) {
       className="flex items-center justify-center"
       style={{ width: "100%", height: "100%" }}
     >
-      <div className="relative w-96 h-96 sm:w-96 sm:h-96 select-none flex items-center justify-center">
+      <div
+        className="relative w-96 h-96 sm:w-96 sm:h-96 select-none flex items-center justify-center"
+        // Hide the SVG server-side / pre-mount to avoid a visible flash of the
+        // unmasked logo. It becomes visible immediately after mount (and the
+        // reveal animation begins).
+        style={{ visibility: mounted ? "visible" : "hidden" }}
+      >
         {/* Replaced SVG loader with CSS-based text loader for stability during debugging */}
           {/* Inline SVG: stroke-only outlines visible, fill revealed from bottom→top via an internal mask rectangle that animates upward. */}
           <svg
@@ -67,7 +84,23 @@ export default function LoadingCounter({ onFinish }: LoadingCounterProps) {
             <defs>
               <mask id="revealMask">
                 <rect x="0" y="0" width="100%" height="100%" fill="black" />
-                  {/* Use Framer Motion to animate the mask rect for consistent behavior on reload */}
+                  {/* Static fallback rect placed off-canvas to ensure the logo is hidden
+                      until the animated mask is applied. This prevents a flash where the
+                      logo appears briefly before the reveal animation begins. */}
+                  <rect
+                    className="mask-fallback"
+                    x="0"
+                    y="0"
+                    width="100%"
+                    height="100%"
+                    fill="white"
+                    style={{ transform: "translateY(100%)" }}
+                  />
+
+                  {/* Use Framer Motion to animate the mask rect for the reveal. Remove the
+                      initial delay so the loader begins in the masked (hidden) state and
+                      reveals immediately. Respect reduced-motion preference by skipping
+                      the animation when requested. */}
                   <motion.rect
                     className="mask-fallback"
                     x="0"
@@ -76,8 +109,8 @@ export default function LoadingCounter({ onFinish }: LoadingCounterProps) {
                     height="100%"
                     fill="white"
                     initial={{ translateY: "100%" }}
-                    animate={{ translateY: "0%" }}
-                    transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+                    animate={prefersReduced ? { translateY: "0%" } : { translateY: "0%" }}
+                    transition={{ duration: 1, ease: "easeOut" }}
                   />
               </mask>
             </defs>
