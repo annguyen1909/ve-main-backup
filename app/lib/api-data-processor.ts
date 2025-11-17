@@ -23,6 +23,14 @@ export interface OrganizedProject {
   totalImages: number;
 }
 
+const API_BASE = process.env.BASE_API_URL ?? 'https://api.visualennode.com';
+
+function makeAbsoluteUrl(src?: string | null) {
+  if (!src) return undefined;
+  if (src.startsWith('http://') || src.startsWith('https://')) return src;
+  return `${API_BASE}${src.startsWith('/') ? '' : '/'}${src}`;
+}
+
 // Get priority order for custom project sorting
 function getProjectPriority(projectTitle: string): number | null {
   const priorityOrder: Record<string, number> = {
@@ -120,10 +128,70 @@ export function groupWorksByProject(works: WorkResource[]): OrganizedProject[] {
         resolvedVideoUrl = linkVideo;
       }
 
+      // Helper: try several places for an attachment/thumbnail URL and prefer optimized variants
+      function resolveAttachmentUrl(w: WorkResource): string | undefined {
+        // Prefer explicit optimized / attachment_url fields
+        if (w.optimize_attachment_url) return makeAbsoluteUrl(String(w.optimize_attachment_url));
+        if (w.attachment_url) return makeAbsoluteUrl(String(w.attachment_url));
+
+        // Some API responses embed an attachment object with different keys
+        const a = w.attachment as any;
+        if (a && typeof a === 'object') {
+          if (a.optimize_attachment_url) return makeAbsoluteUrl(String(a.optimize_attachment_url));
+          if (a.attachment_url) return makeAbsoluteUrl(String(a.attachment_url));
+          if (a.url) return makeAbsoluteUrl(String(a.url));
+          if (a.path) return makeAbsoluteUrl(String(a.path));
+          if (a.src) return makeAbsoluteUrl(String(a.src));
+        }
+
+        return undefined;
+      }
+
+      // Try to derive an optimize_thumbnail candidate from known fields when optimize_attachment isn't present
+      function deriveOptimizeThumbnail(w: WorkResource): string | undefined {
+        // If optimize_attachment_url is present and already points to a thumbnail, use it
+        if (w.optimize_attachment_url) return makeAbsoluteUrl(String(w.optimize_attachment_url));
+
+        // Try attachment_url or nested attachment to extract basename
+        const candidates = [String(w.attachment_url || ''), String(w.optimize_attachment_url || '')];
+        const a = w.attachment as any;
+        if (a && typeof a === 'object') {
+          if (a.attachment_url) candidates.push(String(a.attachment_url));
+          if (a.url) candidates.push(String(a.url));
+          if (a.path) candidates.push(String(a.path));
+          if (a.src) candidates.push(String(a.src));
+        }
+
+        for (const c of candidates) {
+          if (!c) continue;
+          const m = c.match(/([^/?#]+)\.(?:png|jpe?g|webp|gif|svg|bmp|avif|jpg)/i);
+          if (m && m[1]) {
+            // Use the basename (without extension) or include extension depending on source
+            const basename = m[0];
+            return `${API_BASE}/storage/optimize_thumbnail/${basename}`;
+          }
+          const m2 = c.match(/([^/?#]+)$/);
+          if (m2 && m2[1]) {
+            return `${API_BASE}/storage/optimize_thumbnail/${m2[1]}`;
+          }
+        }
+
+        // As a last-ditch attempt, look for a filename inside link_video (some entries embed storage paths)
+        if (typeof w.link_video === 'string' && w.link_video) {
+          const mv = String(w.link_video).match(/([^/?#]+)\.(?:mp4|webm|jpg|jpeg|png)/i);
+          if (mv && mv[1]) return `${API_BASE}/storage/optimize_thumbnail/${mv[0]}`;
+        }
+
+        return undefined;
+      }
+
+      const resolvedUrl = resolveAttachmentUrl(work);
+      const derivedThumb = deriveOptimizeThumbnail(work);
+
       return {
         id: work.slug,
-        // use the optimized attachment as the poster/thumbnail
-        url: work.optimize_attachment_url || work.attachment_url,
+        // Prefer the resolved optimized attachment (absolute), otherwise use a derived optimize_thumbnail candidate
+        url: resolvedUrl || derivedThumb || '',
         mediaType: (resolvedVideoUrl ? 'video' : 'image') as 'video' | 'image',
         videoUrl: resolvedVideoUrl ?? null,
         title: work.title,

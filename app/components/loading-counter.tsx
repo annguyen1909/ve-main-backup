@@ -25,6 +25,8 @@ export default function LoadingCounter({ onFinish }: LoadingCounterProps) {
   // Control initial visibility: keep the SVG hidden until the component mounts
   // so we don't flash the logo before the masked animation runs.
   const [mounted, setMounted] = useState(false);
+  // number to display below the SVG, synced with the motion value
+  const [displayCount, setDisplayCount] = useState<number>(0);
 
   useEffect(() => {
     // ensure we mark mounted on the next animation frame so the DOM has applied
@@ -38,6 +40,8 @@ export default function LoadingCounter({ onFinish }: LoadingCounterProps) {
     // animate count from 0 to 100 (slower for a longer load feel)
     const controls = animate(count, 100, { duration: 1.5, ease: "easeOut" });
     const unsubscribe = count.on("change", (v) => {
+      // update displayed number (rounded)
+      setDisplayCount(Math.round(Number(v)));
       if (v >= 100) {
         onFinish?.();
         controls.stop();
@@ -125,6 +129,15 @@ export default function LoadingCounter({ onFinish }: LoadingCounterProps) {
 
         {/* Loader styles are now in `app/tailwind.css` as `.loader` (text)
             and `.loader-image` / `.loader-image__img` (image mask). */}
+          {/* Loader styles are now in `app/tailwind.css` as `.loader` (text)
+            and `.loader-image` / `.loader-image__img` (image mask). */}
+          {/* numeric counter synced with the animated motion value */}
+          <div
+            className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-white text-2xl md:text-4xl"
+            style={{ fontFamily: `Montserrat, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial` }}
+          >
+            {displayCount}
+          </div>
       </div>
     </div>
   );

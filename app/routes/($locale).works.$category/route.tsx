@@ -96,6 +96,47 @@ export default function Works() {
   const [showModal, setShowModal] = useState(false);
   const [emblaApi, setEmblaApi] = useState<CarouselApi | null>(null);
 
+  // Simple YouTube player wrapper: canonical embed URL with modest branding
+  // Accepts a className so it fills the same area as other media elements.
+  function YouTubePlayer({
+    url,
+    title,
+    className,
+  }: {
+    url: string;
+    title?: string;
+    className?: string;
+  }) {
+    function extractId(u: string) {
+      try {
+        const parsed = new URL(u);
+        const v = parsed.searchParams.get("v");
+        if (v && v.length === 11) return v;
+      } catch (e) {
+        // ignore
+      }
+      const m = u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+      return m ? m[1] : undefined;
+    }
+
+    const id = extractId(url);
+
+    const src = id
+      ? `https://www.youtube.com/embed/${id}?controls=1&modestbranding=1&rel=0&playsinline=1`
+      : url;
+
+    return (
+      <iframe
+        className={className}
+        src={src}
+        title={title}
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    );
+  }
+
   // Projects are provided by the loader (server-side grouping & normalization)
   // The loader already respects `q` and `tag_id` search params so changing them will reload data
 
@@ -250,46 +291,165 @@ export default function Works() {
             const isVideoCover = coverImage.mediaType === 'video' && !!coverImage.videoUrl;
 
             return (
-              <button
-                key={project.title}
-                type="button"
-                onClick={() => handleImageClick(project, 0)}
-                className="group cursor-pointer"
-                onMouseEnter={() => {
-                  // Play the nested video element if present
-                  const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`) as HTMLVideoElement | null;
-                  if (vid) {
-                    vid.play().catch(() => {});
-                  }
-                }}
-                onMouseLeave={() => {
-                  // Pause the nested video element if present
-                  const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`) as HTMLVideoElement | null;
-                  if (vid) {
-                    vid.pause();
-                  }
-                }}
-              >
+              // For video covers we don't want the entire card click to open the modal.
+              // Non-video items remain buttons that open the modal on click.
+              isVideoCover ? (
+                <button
+                  key={project.title}
+                  type="button"
+                  onClick={() => handleImageClick(project, 0)}
+                  className="group cursor-pointer"
+                  onMouseEnter={() => {
+                    const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`) as HTMLVideoElement | null;
+                    if (vid) vid.play().catch(() => {});
+                  }}
+                  onMouseLeave={() => {
+                    const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`) as HTMLVideoElement | null;
+                    if (vid) vid.pause();
+                  }}
+                >
+                  {/* Project Cover Image */}
+                  <div
+                    className={`aspect-[4/3] relative overflow-hidden transition-all duration-300 ${isVideoCover ? 'group-hover:shadow-2xl' : 'group-hover:shadow-2xl group-hover:bg-white/60'}`}
+                  >
+                    {coverImage.mediaType === 'video' && coverImage.videoUrl ? (
+                      // If an admin-provided thumbnail exists, prefer it over rendering the video element
+                      coverImage.url ? (
+                        <img
+                          src={coverImage.url}
+                          alt={project.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (/youtube\.com|youtu\.be/i).test(coverImage.videoUrl) ? (
+                        // For YouTube links, show the thumbnail in the grid and load the player only in the modal
+                        (() => {
+                          // Try to extract a YouTube ID more robustly (v= param, embed, or youtu.be)
+                          let idMatch = undefined;
+                          try {
+                            const parsed = new URL(coverImage.videoUrl);
+                            const v = parsed.searchParams.get('v');
+                            if (v && v.length === 11) idMatch = [null, v];
+                          } catch (e) {
+                            // not a parsable absolute URL — fall back to regex
+                          }
+
+                          if (!idMatch) {
+                            idMatch = coverImage.videoUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+                            if (!idMatch) {
+                              // try a relaxed regex to catch other common patterns
+                              idMatch = coverImage.videoUrl.match(/([A-Za-z0-9_-]{11})/);
+                            }
+                          }
+
+                          const ytThumb = idMatch ? `https://i.ytimg.com/vi/${idMatch[1]}/hqdefault.jpg` : undefined;
+                          // Prefer an admin-provided thumbnail (`coverImage.url`) when available;
+                          // fall back to the YouTube-generated thumbnail if not, otherwise show a placeholder.
+                          const src = ytThumb || '/images/video-placeholder.jpg';
+                          return (
+                            <img
+                              src={src}
+                              alt={project.title}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          );
+                        })()
+                      ) : (
+                        <video
+                          className="w-full h-full object-cover"
+                          src={coverImage.videoUrl}
+                          muted
+                          playsInline
+                          loop
+                          preload="metadata"
+                          data-project-index={projectIndex}
+                          onLoadedMetadata={(e) => {
+                            try {
+                              const v = e.currentTarget as HTMLVideoElement;
+                              if (v.readyState >= 1) {
+                                v.currentTime = 0.05;
+                                v.pause();
+                              }
+                            } catch (err) {
+                              // ignore
+                            }
+                          }}
+                        />
+                      )) : (
+                      <img
+                        src={coverImage.url}
+                        alt={project.title}
+                        className="w-full h-full group-hover:scale-105 group-hover:blur-[1.5px] object-cover transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    )}
+
+                    {/* Overlay with project info - only visible on hover (hidden for video covers) */}
+                    {isVideoCover ? (
+                      // Center the title in the middle of the card on hover
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none">
+                        <h3
+                          className="font-medium text-lg mb-0 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out text-center"
+                          data-koreanable
+                        >
+                          {project.title}
+                        </h3>
+                      </div>
+                    ) : (
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out">
+                        <div className="absolute bottom-[40%] left-0 right-0 p-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out">
+                          <h3
+                            className="font-medium text-lg mb-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out"
+                            data-koreanable
+                          >
+                            {project.title}
+                          </h3>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </button>
+                
+              ) : (
+                <button
+                  key={project.title}
+                  type="button"
+                  onClick={() => handleImageClick(project, 0)}
+                  className="group cursor-pointer"
+                  onMouseEnter={() => {
+                    // Play the nested video element if present
+                    const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`) as HTMLVideoElement | null;
+                    if (vid) {
+                      vid.play().catch(() => {});
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    // Pause the nested video element if present
+                    const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`) as HTMLVideoElement | null;
+                    if (vid) {
+                      vid.pause();
+                    }
+                  }}
+                >
                 {/* Project Cover Image */}
                 <div
                   className={`aspect-[4/3] relative overflow-hidden transition-all duration-300 ${isVideoCover ? 'group-hover:shadow-2xl' : 'group-hover:shadow-2xl group-hover:bg-white/60'}`}
                 >
                   {coverImage.mediaType === 'video' && coverImage.videoUrl ? (
-                    // If the videoUrl is a YouTube or Vimeo link, embed via iframe; otherwise use a native <video>
-                    (/youtube\.com|youtu\.be|vimeo\.com/i).test(coverImage.videoUrl) ? (
-                      <iframe
-                        className="w-full h-full object-cover"
-                        src={
-                          coverImage.videoUrl.includes('youtu')
-                            ? coverImage.videoUrl.replace(/watch\?v=/, 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')
-                            : coverImage.videoUrl.includes('vimeo')
-                            ? coverImage.videoUrl.replace(/vimeo\.com\//, 'player.vimeo.com/video/')
-                            : coverImage.videoUrl
-                        }
+                    // If an admin-provided thumbnail exists, prefer it over rendering the video element
+                    coverImage.url ? (
+                      <img
+                        src={coverImage.url}
+                        alt={project.title}
+                        className="w-full h-full group-hover:scale-105 group-hover:blur-[1.5px] object-cover transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    ) : (/youtube\.com|youtu\.be|vimeo\.com/i).test(coverImage.videoUrl) ? (
+                      <YouTubePlayer
+                        url={coverImage.videoUrl}
                         title={project.title}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <video
@@ -329,7 +489,7 @@ export default function Works() {
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none">
                       <div className="absolute bottom-[40%] left-0 right-0 p-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out">
                         <h3
-                          className="font-medium text-lg mb-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out"
+                          className="font-medium text-lg mb-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out text-center"
                           data-koreanable
                         >
                           {project.title}
@@ -339,10 +499,10 @@ export default function Works() {
                   ) : (
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out">
                       <div className="absolute bottom-[40%] left-0 right-0 p-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                        <h3
-                          className="font-medium text-lg mb-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out"
-                          data-koreanable
-                        >
+                          <h3
+                            className="font-medium text-lg mb-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out text-center"
+                            data-koreanable
+                          >
                           {project.title}
                         </h3>
                       </div>
@@ -350,7 +510,7 @@ export default function Works() {
                   )}
                 </div>
               </button>
-            );
+            ))
           })}
         </div>
       </Container>
@@ -415,37 +575,34 @@ export default function Works() {
                         <div className="relative inline-block max-w-full">
                           {img.mediaType === 'video' && img.videoUrl ? (
                             (/youtube\.com|youtu\.be|vimeo\.com/i).test(img.videoUrl) ? (
-                              <iframe
-                                src={
-                                  img.videoUrl.includes('youtu')
-                                    ? img.videoUrl.replace(/watch\?v=/, 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')
-                                    : img.videoUrl.includes('vimeo')
-                                    ? img.videoUrl.replace(/vimeo\.com\//, 'player.vimeo.com/video/')
-                                    : img.videoUrl
-                                }
-                                className="max-w-full max-h-[60vh] object-contain rounded-lg"
-                                title={selectedProject.title}
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                              />
+                              <div className="w-[min(60vw)] h-[min(70vh)]">
+                                <YouTubePlayer
+                                  url={img.videoUrl}
+                                  title={selectedProject.title}
+                                  className="w-full h-full object-contain rounded-lg"
+                                />
+                              </div>
                             ) : (
-                              <video
-                                src={img.videoUrl || undefined}
-                                className="max-w-full max-h-[60vh] object-contain rounded-lg"
-                                controls
-                                autoPlay
-                                playsInline
-                                controlsList="nodownload"
-                                muted
-                              />
+                              <div className="w-[min(60vw)] h-[min(70vh)]">
+                                <video
+                                  src={img.videoUrl || undefined}
+                                  className="w-full h-full object-contain rounded-lg"
+                                  controls
+                                  autoPlay
+                                  playsInline
+                                  controlsList="nodownload"
+                                  muted
+                                />
+                              </div>
                             )
                           ) : (
-                            <img
-                              src={img.url}
-                              alt={img.title}
-                              className="max-w-full max-h-[60vh] object-contain rounded-lg"
-                            />
+                            <div className="w-[min(90vw,1200px)] h-[min(80vh,800px)]">
+                              <img
+                                src={img.url}
+                                alt={img.title}
+                                className="w-full h-full object-contain rounded-lg"
+                              />
+                            </div>
                           )}
 
                           <button
