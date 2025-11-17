@@ -114,9 +114,17 @@ export default function Index() {
     let videoLoadedCount = 0;
     let autoplayVideoCount = 0;
 
+    // Only count autoplay videos that are actually expected to preload/auto-play.
+    // If a video explicitly sets preload="none" we should not wait for it
+    // to reach canplaythrough as that will delay the initial render (especially on mobile).
     videos.forEach((video) => {
-      if (video.autoplay) {
-        autoplayVideoCount++;
+      try {
+        const preloadAttr = video.getAttribute("preload");
+        if (video.autoplay && preloadAttr !== "none") {
+          autoplayVideoCount++;
+        }
+      } catch (e) {
+        // ignore
       }
     });
 
@@ -135,20 +143,30 @@ export default function Index() {
     }
 
     videos.forEach((video) => {
-      if (video.autoplay) {
-        if (video.readyState >= video.HAVE_FUTURE_DATA) {
-          handleLoadedVideo();
-          return;
-        }
+      try {
+        const preloadAttr = video.getAttribute("preload");
+        if (video.autoplay && preloadAttr !== "none") {
+          if (video.readyState >= video.HAVE_FUTURE_DATA) {
+            handleLoadedVideo();
+            return;
+          }
 
-        video.addEventListener("canplaythrough", handleLoadedVideo);
+          video.addEventListener("canplaythrough", handleLoadedVideo);
+        }
+      } catch (e) {
+        // ignore any cross-origin or unexpected errors
       }
     });
 
     return () => {
       videos.forEach((video) => {
-        if (video.autoplay) {
-          video.removeEventListener("canplaythrough", handleLoadedVideo);
+        try {
+          const preloadAttr = video.getAttribute("preload");
+          if (video.autoplay && preloadAttr !== "none") {
+            video.removeEventListener("canplaythrough", handleLoadedVideo);
+          }
+        } catch (e) {
+          // ignore
         }
       });
     };

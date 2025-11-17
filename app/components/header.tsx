@@ -298,14 +298,15 @@ export default function Header({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-36 mt-2 bg-[#111111]/60 rounded-none shadow-lg flex flex-col items-center border-none"
+                className="w-36 mt-2 bg-[#111111]/60 rounded-sm shadow-none flex flex-col items-center border-0"
               >
                 <DropdownMenuItem
                   onClick={() => switchLocale("en")}
                   className={cn(
-                    "w-full text-center rounded-none text-base justify-center py-2 transition-colors",
+                    "w-full text-center rounded-sm text-base justify-center py-2 transition-colors",
+                    // Use a subtle dark highlight and white text for the active locale
                     locale === "en"
-                      ? "bg-white text-black"
+                      ? "bg-white/10 text-white font-medium"
                       : "text-white/80 hover:bg-white/5"
                   )}
                 >
@@ -314,9 +315,10 @@ export default function Header({
                 <DropdownMenuItem
                   onClick={() => switchLocale("ko")}
                   className={cn(
-                    "w-full text-center rounded-none text-base justify-center py-2 transition-colors",
+                    "w-full text-center rounded-sm text-base justify-center py-2 transition-colors",
+                    // Use the same subtle dark highlight for Korean when active
                     locale === "ko"
-                      ? "bg-white text-black"
+                      ? "bg-white/10 text-white font-medium"
                       : "text-white/80 hover:bg-white/5"
                   )}
                 >
@@ -347,11 +349,15 @@ export default function Header({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-44 mt-2 rounded-none bg-[#111111] p-6 shadow-lg flex flex-col items-center gap-6"
+                    className="w-44 mt-2 rounded-sm bg-[#111111] p-6 shadow-none flex flex-col items-center gap-6 border-0"
                   >
                     <DropdownMenuItem
                       onClick={() => switchLocale("en")}
-                      className="w-full text-center text-lg py-3"
+                      className={cn(
+                        "w-full text-center text-lg py-3",
+                        // mobile menu: make selected locale white on subtle dark bg
+                        locale === "en" ? "bg-white/10 text-white font-medium rounded-sm" : "text-white/80"
+                      )}
                     >
                       <span className="montserrat-for-en">English</span>
                     </DropdownMenuItem>
@@ -359,7 +365,8 @@ export default function Header({
                       onClick={() => switchLocale("ko")}
                       className={cn(
                         "w-full text-center text-xl font-medium py-4",
-                        locale === "ko" ? "bg-white text-black" : "text-white/80"
+                        // mobile menu: keep selected item readable on dark background
+                        locale === "ko" ? "bg-white/10 text-white font-medium rounded-sm" : "text-white/80"
                       )}
                     >
                       <span className="montserrat-for-en">Korean</span>

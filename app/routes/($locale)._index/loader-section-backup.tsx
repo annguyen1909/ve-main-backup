@@ -41,7 +41,7 @@ const LoaderSection = forwardRef<HTMLElement>((props, ref) => {
         initial={{ opacity: 1 }}
         animate={{ opacity: 0 }}
         onAnimationComplete={() => setAnimationComplete(true)}
-        transition={{ duration: navigation.state === "loading" ? false : 5 }}
+        transition={{ duration: navigation.state === "loading" ? 0 : 5 }}
         className={cn(
           "bg-black top-0 left-0 absolute w-full h-full",
           animationComplete ? "" : "z-30"

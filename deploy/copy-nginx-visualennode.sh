@@ -5,8 +5,13 @@ set -euo pipefail
 # Edit REMOTE_USER and REMOTE_HOST at the top, then run locally:
 # ./deploy/copy-nginx-visualennode.sh
 
-REMOTE_USER="dev_2"
-REMOTE_HOST="bach9087.cafe24.com"
+# Update these to match your target server. For DO use something like root@visualennode.com
+REMOTE_USER="root"
+REMOTE_HOST="visualennode.com"
+# Optional: if your SSH listens on a non-standard port, set SSH_PORT (leave empty to use default)
+SSH_PORT=""
+# Optional: specify an identity file to use for scp/ssh (e.g. -i /path/to/key). Leave empty to use default ssh agent.
+SSH_IDENTITY_FILE=""
 LOCAL_CONF_PATH="deploy/nginx/visualennode.conf"
 REMOTE_TMP_PATH="/tmp/visualennode.conf"
 REMOTE_CONF_PATH="/etc/nginx/sites-available/visualennode"
@@ -17,8 +22,23 @@ if [ ! -f "$LOCAL_CONF_PATH" ]; then
   exit 1
 fi
 
+SSH_OPTS=()
+if [ -n "$SSH_PORT" ]; then
+  SSH_OPTS+=( -P "$SSH_PORT" )
+fi
+SCP_CMD=(scp)
+SSH_CMD=(ssh)
+if [ -n "$SSH_IDENTITY_FILE" ]; then
+  SCP_CMD+=( -i "$SSH_IDENTITY_FILE" )
+  SSH_CMD+=( -i "$SSH_IDENTITY_FILE" )
+fi
+if [ -n "$SSH_PORT" ]; then
+  SCP_CMD+=( -P "$SSH_PORT" )
+  SSH_CMD+=( -p "$SSH_PORT" )
+fi
+
 echo "Copying $LOCAL_CONF_PATH to $REMOTE_USER@$REMOTE_HOST:$REMOTE_TMP_PATH"
-scp "$LOCAL_CONF_PATH" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_TMP_PATH"
+"${SCP_CMD[@]}" "$LOCAL_CONF_PATH" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_TMP_PATH"
 
 echo "Moving into place, enabling site and reloading nginx on remote host"
 ssh "$REMOTE_USER@$REMOTE_HOST" bash -lc $'\

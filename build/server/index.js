@@ -980,15 +980,16 @@ function Header({
                     DropdownMenuContent,
                     {
                       align: "end",
-                      className: "w-36 mt-2 bg-[#111111]/60 rounded-none shadow-lg flex flex-col items-center border-none",
+                      className: "w-36 mt-2 bg-[#111111]/60 rounded-sm shadow-none flex flex-col items-center border-0",
                       children: [
                         /* @__PURE__ */ jsx(
                           DropdownMenuItem,
                           {
                             onClick: () => switchLocale("en"),
                             className: cn(
-                              "w-full text-center rounded-none text-base justify-center py-2 transition-colors",
-                              locale === "en" ? "bg-white text-black" : "text-white/80 hover:bg-white/5"
+                              "w-full text-center rounded-sm text-base justify-center py-2 transition-colors",
+                              // Use a subtle dark highlight and white text for the active locale
+                              locale === "en" ? "bg-white/10 text-white font-medium" : "text-white/80 hover:bg-white/5"
                             ),
                             children: /* @__PURE__ */ jsx("span", { className: "montserrat-for-en", children: "English" })
                           }
@@ -998,8 +999,9 @@ function Header({
                           {
                             onClick: () => switchLocale("ko"),
                             className: cn(
-                              "w-full text-center rounded-none text-base justify-center py-2 transition-colors",
-                              locale === "ko" ? "bg-white text-black" : "text-white/80 hover:bg-white/5"
+                              "w-full text-center rounded-sm text-base justify-center py-2 transition-colors",
+                              // Use the same subtle dark highlight for Korean when active
+                              locale === "ko" ? "bg-white/10 text-white font-medium" : "text-white/80 hover:bg-white/5"
                             ),
                             children: /* @__PURE__ */ jsx("span", { className: "montserrat-for-en", children: "Korean" })
                           }
@@ -1029,13 +1031,17 @@ function Header({
                           DropdownMenuContent,
                           {
                             align: "end",
-                            className: "w-44 mt-2 rounded-none bg-[#111111] p-6 shadow-lg flex flex-col items-center gap-6",
+                            className: "w-44 mt-2 rounded-sm bg-[#111111] p-6 shadow-none flex flex-col items-center gap-6 border-0",
                             children: [
                               /* @__PURE__ */ jsx(
                                 DropdownMenuItem,
                                 {
                                   onClick: () => switchLocale("en"),
-                                  className: "w-full text-center text-lg py-3",
+                                  className: cn(
+                                    "w-full text-center text-lg py-3",
+                                    // mobile menu: make selected locale white on subtle dark bg
+                                    locale === "en" ? "bg-white/10 text-white font-medium rounded-sm" : "text-white/80"
+                                  ),
                                   children: /* @__PURE__ */ jsx("span", { className: "montserrat-for-en", children: "English" })
                                 }
                               ),
@@ -1045,7 +1051,8 @@ function Header({
                                   onClick: () => switchLocale("ko"),
                                   className: cn(
                                     "w-full text-center text-xl font-medium py-4",
-                                    locale === "ko" ? "bg-white text-black" : "text-white/80"
+                                    // mobile menu: keep selected item readable on dark background
+                                    locale === "ko" ? "bg-white/10 text-white font-medium rounded-sm" : "text-white/80"
                                   ),
                                   children: /* @__PURE__ */ jsx("span", { className: "montserrat-for-en", children: "Korean" })
                                 }
@@ -1562,7 +1569,7 @@ function LoadingCounter({ onFinish }) {
     raf = window.requestAnimationFrame(() => setMounted(true));
     if (typeof window === "undefined") return;
     const controls = animate(count, 100, { duration: 1.5, ease: "easeOut" });
-    const unsubscribe = count.onChange((v) => {
+    const unsubscribe = count.on("change", (v) => {
       if (v >= 100) {
         onFinish?.();
         controls.stop();
@@ -2243,7 +2250,7 @@ function Works$2() {
               opacity: 1,
               x: 0
             },
-            fetchPriority: "high",
+            ...{ fetchpriority: "high" },
             onLoad: handeLoadImage,
             exit: { opacity: 0 }
           }
@@ -4971,7 +4978,7 @@ function Works() {
             loop: true,
             preload: "auto",
             className: cn(
-              "absolute p-6 md:p-0 inset-0 object-cover h-dvh w-full max-h-dvh"
+              "absolute p-0 md:p-0 inset-0 object-cover h-dvh w-full max-h-dvh"
             ),
             children: /* @__PURE__ */ jsx("source", { src: imageCategory.attachment_url, type: "video/mp4" })
           }
@@ -5029,7 +5036,7 @@ function Works() {
             loop: true,
             preload: "auto",
             className: cn(
-              "absolute p-6 md:p-0 inset-0 object-cover h-dvh w-full max-h-dvh"
+              "absolute p-0 md:p-0 inset-0 object-cover h-dvh w-full max-h-dvh"
             ),
             children: /* @__PURE__ */ jsx("source", { src: cinematicCategory.attachment_url, type: "video/mp4" })
           }
@@ -5082,7 +5089,7 @@ function Works() {
       "div",
       {
         "aria-hidden": true,
-        className: "absolute inset-x-0 bottom-0 h-[12%] bg-gradient-to-b from-transparent to-[#1b1b1b] pointer-events-none z-10"
+        className: "absolute inset-x-0 bottom-0 h-[12%] bg-gradient-to-b from-transparent to-[#1b1b1b] pointer-events-none z-10 max-md:hidden"
       }
     ),
     /* @__PURE__ */ jsx(ContactSection, {})
@@ -6493,8 +6500,12 @@ function Index() {
     let videoLoadedCount = 0;
     let autoplayVideoCount = 0;
     videos.forEach((video) => {
-      if (video.autoplay) {
-        autoplayVideoCount++;
+      try {
+        const preloadAttr = video.getAttribute("preload");
+        if (video.autoplay && preloadAttr !== "none") {
+          autoplayVideoCount++;
+        }
+      } catch (e) {
       }
     });
     function handleLoadedVideo() {
@@ -6508,18 +6519,26 @@ function Index() {
       }
     }
     videos.forEach((video) => {
-      if (video.autoplay) {
-        if (video.readyState >= video.HAVE_FUTURE_DATA) {
-          handleLoadedVideo();
-          return;
+      try {
+        const preloadAttr = video.getAttribute("preload");
+        if (video.autoplay && preloadAttr !== "none") {
+          if (video.readyState >= video.HAVE_FUTURE_DATA) {
+            handleLoadedVideo();
+            return;
+          }
+          video.addEventListener("canplaythrough", handleLoadedVideo);
         }
-        video.addEventListener("canplaythrough", handleLoadedVideo);
+      } catch (e) {
       }
     });
     return () => {
       videos.forEach((video) => {
-        if (video.autoplay) {
-          video.removeEventListener("canplaythrough", handleLoadedVideo);
+        try {
+          const preloadAttr = video.getAttribute("preload");
+          if (video.autoplay && preloadAttr !== "none") {
+            video.removeEventListener("canplaythrough", handleLoadedVideo);
+          }
+        } catch (e) {
         }
       });
     };
@@ -6650,14 +6669,14 @@ const route15 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: DebugOverflow
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const serverManifest = {'entry':{'module':'/assets/entry.client-C0dgAWPW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js'],'css':[]},'routes':{'root':{'id':'root','parentId':undefined,'path':'','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':true,'module':'/assets/root-yspHjS6W.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js','/assets/useTranslation-C2uTB0a1.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/index-BgzGjlS9.js','/assets/chevron-right-BxmQk4H8.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/loading-counter-DmiKNHUe.js','/assets/elements-Dbp8aVoy.js','/assets/index-D3ZRcz1e.js','/assets/resolve-elements-WL2ErOKm.js'],'css':['/assets/root-DM7ddGl_.css']},'routes/($locale).ennode.digital._index':{'id':'routes/($locale).ennode.digital._index','parentId':'root','path':':locale?/ennode/digital','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CyQhggqy.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/carousel-9jwcCCO4.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js'],'css':[]},'routes/($locale).works.$category.$work':{'id':'routes/($locale).works.$category.$work','parentId':'routes/($locale).works.$category','path':':work','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-Bd1YvllV.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/Combination-Bn4r43AQ.js','/assets/index-BgzGjlS9.js','/assets/utils-tQ8evKDJ.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/icon-CP4mJMRx.js','/assets/i18n-DH-wL5Eu.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).ennode.arc._index':{'id':'routes/($locale).ennode.arc._index','parentId':'root','path':':locale?/ennode/arc','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CnigBhY1.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/team-section-CkguuTle.js','/assets/i18n-DH-wL5Eu.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js'],'css':[]},'routes/($locale).news.$slug._index':{'id':'routes/($locale).news.$slug._index','parentId':'root','path':':locale?/news/:slug','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BRkCHnmW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/utils-tQ8evKDJ.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works.$category':{'id':'routes/($locale).works.$category','parentId':'root','path':':locale?/works/:category','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BjgdLnI0.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).contact._index':{'id':'routes/($locale).contact._index','parentId':'root','path':':locale?/contact','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB-XYw2H.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/index-D3ZRcz1e.js','/assets/utils-tQ8evKDJ.js','/assets/icon-CP4mJMRx.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).career._index':{'id':'routes/($locale).career._index','parentId':'root','path':':locale?/career','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-D4fZkf_X.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/index-D3ZRcz1e.js','/assets/i18n-DH-wL5Eu.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/utils-tQ8evKDJ.js'],'css':[]},'routes/($locale).ennode._index':{'id':'routes/($locale).ennode._index','parentId':'root','path':':locale?/ennode','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-oJw-tJEK.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon-$name':{'id':'routes/($locale).favicon-$name','parentId':'root','path':':locale?/favicon-$name','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon-_name-CZ0Ns0X4.js','imports':[],'css':[]},'routes/($locale).about._index':{'id':'routes/($locale).about._index','parentId':'root','path':':locale?/about','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-7zsO4kyg.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/utils-tQ8evKDJ.js','/assets/process-section-Bc9sS8WA.js','/assets/team-section-CkguuTle.js','/assets/contact-section-B-y5Wsm-.js','/assets/carousel-9jwcCCO4.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works._index':{'id':'routes/($locale).works._index','parentId':'root','path':':locale?/works','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CTNqqIJh.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/i18n-DH-wL5Eu.js','/assets/useTranslation-C2uTB0a1.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/container-2TlAo-hG.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js','/assets/context-DOdfq747.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon.ico':{'id':'routes/($locale).favicon.ico','parentId':'root','path':':locale?/favicon/ico','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon.ico-l0sNRNKZ.js','imports':[],'css':[]},'routes/($locale).news._index':{'id':'routes/($locale).news._index','parentId':'root','path':':locale?/news','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB7MG7Cd.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/chevron-right-BxmQk4H8.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale)._index':{'id':'routes/($locale)._index','parentId':'root','path':':locale?','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-voGDrq99.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/contact-section-B-y5Wsm-.js','/assets/loading-counter-DmiKNHUe.js','/assets/process-section-Bc9sS8WA.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/resolve-elements-WL2ErOKm.js','/assets/contact-cta-section-BBuv_ViC.js'],'css':[]},'routes/debug.overflow':{'id':'routes/debug.overflow','parentId':'root','path':'debug/overflow','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/debug.overflow-C_wAp7uD.js','imports':['/assets/jsx-runtime-kF-aRxYe.js'],'css':[]}},'url':'/assets/manifest-147a91a5.js','version':'147a91a5'};
+const serverManifest = {'entry':{'module':'/assets/entry.client-C0dgAWPW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js'],'css':[]},'routes':{'root':{'id':'root','parentId':undefined,'path':'','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':true,'module':'/assets/root-vFQmW4a0.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js','/assets/useTranslation-C2uTB0a1.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/index-BgzGjlS9.js','/assets/chevron-right-BxmQk4H8.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/loading-counter-qJJaIxk0.js','/assets/elements-Dbp8aVoy.js','/assets/index-D3ZRcz1e.js','/assets/resolve-elements-WL2ErOKm.js'],'css':['/assets/root-qUBKWGo8.css']},'routes/($locale).ennode.digital._index':{'id':'routes/($locale).ennode.digital._index','parentId':'root','path':':locale?/ennode/digital','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CyQhggqy.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/carousel-9jwcCCO4.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js'],'css':[]},'routes/($locale).works.$category.$work':{'id':'routes/($locale).works.$category.$work','parentId':'routes/($locale).works.$category','path':':work','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BNXUzxL6.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/Combination-Bn4r43AQ.js','/assets/index-BgzGjlS9.js','/assets/utils-tQ8evKDJ.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/icon-CP4mJMRx.js','/assets/i18n-DH-wL5Eu.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).ennode.arc._index':{'id':'routes/($locale).ennode.arc._index','parentId':'root','path':':locale?/ennode/arc','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CnigBhY1.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/team-section-CkguuTle.js','/assets/i18n-DH-wL5Eu.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js'],'css':[]},'routes/($locale).news.$slug._index':{'id':'routes/($locale).news.$slug._index','parentId':'root','path':':locale?/news/:slug','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BRkCHnmW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/utils-tQ8evKDJ.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works.$category':{'id':'routes/($locale).works.$category','parentId':'root','path':':locale?/works/:category','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BjgdLnI0.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).contact._index':{'id':'routes/($locale).contact._index','parentId':'root','path':':locale?/contact','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB-XYw2H.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/index-D3ZRcz1e.js','/assets/utils-tQ8evKDJ.js','/assets/icon-CP4mJMRx.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).career._index':{'id':'routes/($locale).career._index','parentId':'root','path':':locale?/career','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-D4fZkf_X.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/index-D3ZRcz1e.js','/assets/i18n-DH-wL5Eu.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/utils-tQ8evKDJ.js'],'css':[]},'routes/($locale).ennode._index':{'id':'routes/($locale).ennode._index','parentId':'root','path':':locale?/ennode','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-oJw-tJEK.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon-$name':{'id':'routes/($locale).favicon-$name','parentId':'root','path':':locale?/favicon-$name','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon-_name-CZ0Ns0X4.js','imports':[],'css':[]},'routes/($locale).about._index':{'id':'routes/($locale).about._index','parentId':'root','path':':locale?/about','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-7zsO4kyg.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/utils-tQ8evKDJ.js','/assets/process-section-Bc9sS8WA.js','/assets/team-section-CkguuTle.js','/assets/contact-section-B-y5Wsm-.js','/assets/carousel-9jwcCCO4.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works._index':{'id':'routes/($locale).works._index','parentId':'root','path':':locale?/works','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-EhS2nDbo.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/i18n-DH-wL5Eu.js','/assets/useTranslation-C2uTB0a1.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/container-2TlAo-hG.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js','/assets/context-DOdfq747.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon.ico':{'id':'routes/($locale).favicon.ico','parentId':'root','path':':locale?/favicon/ico','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon.ico-l0sNRNKZ.js','imports':[],'css':[]},'routes/($locale).news._index':{'id':'routes/($locale).news._index','parentId':'root','path':':locale?/news','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB7MG7Cd.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/chevron-right-BxmQk4H8.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale)._index':{'id':'routes/($locale)._index','parentId':'root','path':':locale?','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BkceaKeC.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/contact-section-B-y5Wsm-.js','/assets/loading-counter-qJJaIxk0.js','/assets/process-section-Bc9sS8WA.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/resolve-elements-WL2ErOKm.js','/assets/contact-cta-section-BBuv_ViC.js'],'css':[]},'routes/debug.overflow':{'id':'routes/debug.overflow','parentId':'root','path':'debug/overflow','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/debug.overflow-C_wAp7uD.js','imports':['/assets/jsx-runtime-kF-aRxYe.js'],'css':[]}},'url':'/assets/manifest-3819fd4e.js','version':'3819fd4e'};
 
 /**
        * `mode` is only relevant for the old Remix compiler but
        * is included here to satisfy the `ServerBuild` typings.
        */
       const mode = "production";
-      const assetsBuildDirectory = "build\\client";
+      const assetsBuildDirectory = "build/client";
       const basename = "/";
       const future = {"v3_fetcherPersist":true,"v3_relativeSplatPath":true,"v3_throwAbortReason":true,"v3_routeConfig":false,"v3_singleFetch":true,"v3_lazyRouteDiscovery":false,"unstable_optimizeDeps":false};
       const isSpaMode = false;
