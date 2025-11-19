@@ -1312,7 +1312,7 @@ const genericTranslations = {
 	"component.contact.address_2.name": "Seoul Office (Korea)",
 	"component.contact.address_2.address": "54, Gangnam-daero 136-gil, Gangnam-gu, Seoul, 06045, Republic of Korea",
 	"component.contact.address_3.name": "Ho Chi Minh City Office (Vietnam)",
-	"component.contact.address_3.address": "1D Nguyễn Duy, Phường 3, Bình Thạnh, Hồ Chí Minh City, 70000, Vietnam",
+	"component.contact.address_3.address": "37 Hoàng Văn Thụ, Phường Cầu Kiệu, Hồ Chí Minh City, 70000, Vietnam",
 	"component.contact.column_1.title": "Let's connect",
 	"component.contact.column_1.body": "Contact us today to discuss your next project and transform your ideas into stunning visual realities.",
 	"component.contact.column_2.title": "Join us",
@@ -1571,10 +1571,7 @@ function LoadingCounter({ onFinish }) {
     if (typeof window === "undefined") return;
     const controls = animate(count, 100, { duration: 1.5, ease: "easeOut" });
     const unsubscribe = count.on("change", (v) => {
-<<<<<<< HEAD
-=======
       setDisplayCount(Math.round(Number(v)));
->>>>>>> 1ba6b83 (update)
       if (v >= 100) {
         onFinish?.();
         controls.stop();
@@ -1650,10 +1647,14 @@ function LoadingCounter({ onFinish }) {
                 ]
               }
             ),
-            /* @__PURE__ */ jsxs("div", { className: "mt-12 text-white text-2xl md:text-4xl text-center w-full", children: [
-              displayCount,
-              "%"
-            ] })
+            /* @__PURE__ */ jsx(
+              "div",
+              {
+                className: "absolute bottom-0 left-1/2 transform -translate-x-1/2 text-white text-2xl md:text-4xl",
+                style: { fontFamily: `Montserrat, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial` },
+                children: displayCount
+              }
+            )
           ]
         }
       )
@@ -2646,6 +2647,12 @@ const route4 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   meta: meta$8
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const API_BASE = process.env.BASE_API_URL ?? "https://api.visualennode.com";
+function makeAbsoluteUrl(src) {
+  if (!src) return void 0;
+  if (src.startsWith("http://") || src.startsWith("https://")) return src;
+  return `${API_BASE}${src.startsWith("/") ? "" : "/"}${src}`;
+}
 function getProjectPriority(projectTitle) {
   const priorityOrder = {
     "Battery Warehouse": 1,
@@ -2718,10 +2725,53 @@ function groupWorksByProject(works) {
       } else if (linkVideo) {
         resolvedVideoUrl = linkVideo;
       }
+      function resolveAttachmentUrl(w) {
+        if (w.optimize_attachment_url) return makeAbsoluteUrl(String(w.optimize_attachment_url));
+        if (w.attachment_url) return makeAbsoluteUrl(String(w.attachment_url));
+        const a = w.attachment;
+        if (a && typeof a === "object") {
+          if (a.optimize_attachment_url) return makeAbsoluteUrl(String(a.optimize_attachment_url));
+          if (a.attachment_url) return makeAbsoluteUrl(String(a.attachment_url));
+          if (a.url) return makeAbsoluteUrl(String(a.url));
+          if (a.path) return makeAbsoluteUrl(String(a.path));
+          if (a.src) return makeAbsoluteUrl(String(a.src));
+        }
+        return void 0;
+      }
+      function deriveOptimizeThumbnail(w) {
+        if (w.optimize_attachment_url) return makeAbsoluteUrl(String(w.optimize_attachment_url));
+        const candidates = [String(w.attachment_url || ""), String(w.optimize_attachment_url || "")];
+        const a = w.attachment;
+        if (a && typeof a === "object") {
+          if (a.attachment_url) candidates.push(String(a.attachment_url));
+          if (a.url) candidates.push(String(a.url));
+          if (a.path) candidates.push(String(a.path));
+          if (a.src) candidates.push(String(a.src));
+        }
+        for (const c of candidates) {
+          if (!c) continue;
+          const m = c.match(/([^/?#]+)\.(?:png|jpe?g|webp|gif|svg|bmp|avif|jpg)/i);
+          if (m && m[1]) {
+            const basename = m[0];
+            return `${API_BASE}/storage/optimize_thumbnail/${basename}`;
+          }
+          const m2 = c.match(/([^/?#]+)$/);
+          if (m2 && m2[1]) {
+            return `${API_BASE}/storage/optimize_thumbnail/${m2[1]}`;
+          }
+        }
+        if (typeof w.link_video === "string" && w.link_video) {
+          const mv = String(w.link_video).match(/([^/?#]+)\.(?:mp4|webm|jpg|jpeg|png)/i);
+          if (mv && mv[1]) return `${API_BASE}/storage/optimize_thumbnail/${mv[0]}`;
+        }
+        return void 0;
+      }
+      const resolvedUrl = resolveAttachmentUrl(work);
+      const derivedThumb = deriveOptimizeThumbnail(work);
       return {
         id: work.slug,
-        // use the optimized attachment as the poster/thumbnail
-        url: work.optimize_attachment_url || work.attachment_url,
+        // Prefer the resolved optimized attachment (absolute), otherwise use a derived optimize_thumbnail candidate
+        url: resolvedUrl || derivedThumb || "",
         mediaType: resolvedVideoUrl ? "video" : "image",
         videoUrl: resolvedVideoUrl ?? null,
         title: work.title,
@@ -2868,6 +2918,35 @@ function Works$1() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [emblaApi, setEmblaApi] = useState(null);
+  function YouTubePlayer({
+    url,
+    title: title2,
+    className
+  }) {
+    function extractId(u) {
+      try {
+        const parsed = new URL(u);
+        const v = parsed.searchParams.get("v");
+        if (v && v.length === 11) return v;
+      } catch (e) {
+      }
+      const m = u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+      return m ? m[1] : void 0;
+    }
+    const id = extractId(url);
+    const src = id ? `https://www.youtube.com/embed/${id}?controls=1&modestbranding=1&rel=0&playsinline=1` : url;
+    return /* @__PURE__ */ jsx(
+      "iframe",
+      {
+        className,
+        src,
+        title: title2,
+        frameBorder: "0",
+        allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
+        allowFullScreen: true
+      }
+    );
+  }
   function handleImageClick(project, imageIndex = 0) {
     setSelectedProject(project);
     setSelectedImageIndex(imageIndex);
@@ -3002,76 +3081,109 @@ function Works$1() {
     /* @__PURE__ */ jsx(Container, { variant: "fluid", className: "sm:!px-10", children: /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-2", children: projects.map((project, projectIndex) => {
       const coverImage = project.images[0];
       const isVideoCover = coverImage.mediaType === "video" && !!coverImage.videoUrl;
-      return /* @__PURE__ */ jsx(
-        "button",
-        {
-          type: "button",
-          onClick: () => handleImageClick(project, 0),
-          className: "group cursor-pointer",
-          onMouseEnter: () => {
-            const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`);
-            if (vid) {
-              vid.play().catch(() => {
+      return (
+        // For video covers we don't want the entire card click to open the modal.
+        // Non-video items remain buttons that open the modal on click.
+        isVideoCover ? /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => handleImageClick(project, 0),
+            className: "group cursor-pointer",
+            onMouseEnter: () => {
+              const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`);
+              if (vid) vid.play().catch(() => {
               });
-            }
-          },
-          onMouseLeave: () => {
-            const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`);
-            if (vid) {
-              vid.pause();
-            }
-          },
-          children: /* @__PURE__ */ jsxs(
-            "div",
-            {
-              className: `aspect-[4/3] relative overflow-hidden transition-all duration-300 ${isVideoCover ? "group-hover:shadow-2xl" : "group-hover:shadow-2xl group-hover:bg-white/60"}`,
-              children: [
-                coverImage.mediaType === "video" && coverImage.videoUrl ? (
-                  // If the videoUrl is a YouTube or Vimeo link, embed via iframe; otherwise use a native <video>
-                  /youtube\.com|youtu\.be|vimeo\.com/i.test(coverImage.videoUrl) ? /* @__PURE__ */ jsx(
-                    "iframe",
-                    {
-                      className: "w-full h-full object-cover",
-                      src: coverImage.videoUrl.includes("youtu") ? coverImage.videoUrl.replace(/watch\?v=/, "embed/").replace("youtu.be/", "www.youtube.com/embed/") : coverImage.videoUrl.includes("vimeo") ? coverImage.videoUrl.replace(/vimeo\.com\//, "player.vimeo.com/video/") : coverImage.videoUrl,
-                      title: project.title,
-                      frameBorder: "0",
-                      allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
-                      allowFullScreen: true
-                    }
-                  ) : /* @__PURE__ */ jsx(
-                    "video",
-                    {
-                      className: "w-full h-full object-cover",
-                      src: coverImage.videoUrl,
-                      muted: true,
-                      playsInline: true,
-                      loop: true,
-                      preload: "metadata",
-                      "data-project-index": projectIndex,
-                      onLoadedMetadata: (e) => {
+            },
+            onMouseLeave: () => {
+              const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`);
+              if (vid) vid.pause();
+            },
+            children: /* @__PURE__ */ jsxs(
+              "div",
+              {
+                className: `aspect-[4/3] relative overflow-hidden transition-all duration-300 ${isVideoCover ? "group-hover:shadow-2xl" : "group-hover:shadow-2xl group-hover:bg-white/60"}`,
+                children: [
+                  coverImage.mediaType === "video" && coverImage.videoUrl ? (
+                    // If an admin-provided thumbnail exists, prefer it over rendering the video element
+                    coverImage.url ? /* @__PURE__ */ jsx(
+                      "img",
+                      {
+                        src: coverImage.url,
+                        alt: project.title,
+                        className: "w-full h-full object-cover",
+                        loading: "lazy"
+                      }
+                    ) : /youtube\.com|youtu\.be/i.test(coverImage.videoUrl) ? (
+                      // For YouTube links, show the thumbnail in the grid and load the player only in the modal
+                      (() => {
+                        let idMatch = void 0;
                         try {
-                          const v = e.currentTarget;
-                          if (v.readyState >= 1) {
-                            v.currentTime = 0.05;
-                            v.pause();
+                          const parsed = new URL(coverImage.videoUrl);
+                          const v = parsed.searchParams.get("v");
+                          if (v && v.length === 11) idMatch = [null, v];
+                        } catch (e) {
+                        }
+                        if (!idMatch) {
+                          idMatch = coverImage.videoUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+                          if (!idMatch) {
+                            idMatch = coverImage.videoUrl.match(/([A-Za-z0-9_-]{11})/);
                           }
-                        } catch (err) {
+                        }
+                        const ytThumb = idMatch ? `https://i.ytimg.com/vi/${idMatch[1]}/hqdefault.jpg` : void 0;
+                        const src = ytThumb || "/images/video-placeholder.jpg";
+                        return /* @__PURE__ */ jsx(
+                          "img",
+                          {
+                            src,
+                            alt: project.title,
+                            className: "w-full h-full object-cover",
+                            loading: "lazy"
+                          }
+                        );
+                      })()
+                    ) : /* @__PURE__ */ jsx(
+                      "video",
+                      {
+                        className: "w-full h-full object-cover",
+                        src: coverImage.videoUrl,
+                        muted: true,
+                        playsInline: true,
+                        loop: true,
+                        preload: "metadata",
+                        "data-project-index": projectIndex,
+                        onLoadedMetadata: (e) => {
+                          try {
+                            const v = e.currentTarget;
+                            if (v.readyState >= 1) {
+                              v.currentTime = 0.05;
+                              v.pause();
+                            }
+                          } catch (err) {
+                          }
                         }
                       }
+                    )
+                  ) : /* @__PURE__ */ jsx(
+                    "img",
+                    {
+                      src: coverImage.url,
+                      alt: project.title,
+                      className: "w-full h-full group-hover:scale-105 group-hover:blur-[1.5px] object-cover transition-transform duration-300",
+                      loading: "lazy"
                     }
-                  )
-                ) : /* @__PURE__ */ jsx(
-                  "img",
-                  {
-                    src: coverImage.url,
-                    alt: project.title,
-                    className: "w-full h-full group-hover:scale-105 group-hover:blur-[1.5px] object-cover transition-transform duration-300",
-                    loading: "lazy"
-                  }
-                ),
-                isVideoCover ? (
-                  // For video covers we hide the dark background but still show the title on hover
-                  /* @__PURE__ */ jsx("div", { className: "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none", children: /* @__PURE__ */ jsx("div", { className: "absolute bottom-[40%] left-0 right-0 p-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out", children: /* @__PURE__ */ jsx(
+                  ),
+                  isVideoCover ? (
+                    // Center the title in the middle of the card on hover
+                    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none", children: /* @__PURE__ */ jsx(
+                      "h3",
+                      {
+                        className: "font-medium text-lg mb-0 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out text-center",
+                        "data-koreanable": true,
+                        children: project.title
+                      }
+                    ) })
+                  ) : /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out", children: /* @__PURE__ */ jsx("div", { className: "absolute bottom-[40%] left-0 right-0 p-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out", children: /* @__PURE__ */ jsx(
                     "h3",
                     {
                       className: "font-medium text-lg mb-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out",
@@ -3079,19 +3191,107 @@ function Works$1() {
                       children: project.title
                     }
                   ) }) })
-                ) : /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out", children: /* @__PURE__ */ jsx("div", { className: "absolute bottom-[40%] left-0 right-0 p-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out", children: /* @__PURE__ */ jsx(
-                  "h3",
-                  {
-                    className: "font-medium text-lg mb-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out",
-                    "data-koreanable": true,
-                    children: project.title
-                  }
-                ) }) })
-              ]
-            }
-          )
-        },
-        project.title
+                ]
+              }
+            )
+          },
+          project.title
+        ) : /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => handleImageClick(project, 0),
+            className: "group cursor-pointer",
+            onMouseEnter: () => {
+              const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`);
+              if (vid) {
+                vid.play().catch(() => {
+                });
+              }
+            },
+            onMouseLeave: () => {
+              const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`);
+              if (vid) {
+                vid.pause();
+              }
+            },
+            children: /* @__PURE__ */ jsxs(
+              "div",
+              {
+                className: `aspect-[4/3] relative overflow-hidden transition-all duration-300 ${isVideoCover ? "group-hover:shadow-2xl" : "group-hover:shadow-2xl group-hover:bg-white/60"}`,
+                children: [
+                  coverImage.mediaType === "video" && coverImage.videoUrl ? (
+                    // If an admin-provided thumbnail exists, prefer it over rendering the video element
+                    coverImage.url ? /* @__PURE__ */ jsx(
+                      "img",
+                      {
+                        src: coverImage.url,
+                        alt: project.title,
+                        className: "w-full h-full group-hover:scale-105 group-hover:blur-[1.5px] object-cover transition-transform duration-300",
+                        loading: "lazy"
+                      }
+                    ) : /youtube\.com|youtu\.be|vimeo\.com/i.test(coverImage.videoUrl) ? /* @__PURE__ */ jsx(
+                      YouTubePlayer,
+                      {
+                        url: coverImage.videoUrl,
+                        title: project.title,
+                        className: "w-full h-full object-cover"
+                      }
+                    ) : /* @__PURE__ */ jsx(
+                      "video",
+                      {
+                        className: "w-full h-full object-cover",
+                        src: coverImage.videoUrl,
+                        muted: true,
+                        playsInline: true,
+                        loop: true,
+                        preload: "metadata",
+                        "data-project-index": projectIndex,
+                        onLoadedMetadata: (e) => {
+                          try {
+                            const v = e.currentTarget;
+                            if (v.readyState >= 1) {
+                              v.currentTime = 0.05;
+                              v.pause();
+                            }
+                          } catch (err) {
+                          }
+                        }
+                      }
+                    )
+                  ) : /* @__PURE__ */ jsx(
+                    "img",
+                    {
+                      src: coverImage.url,
+                      alt: project.title,
+                      className: "w-full h-full group-hover:scale-105 group-hover:blur-[1.5px] object-cover transition-transform duration-300",
+                      loading: "lazy"
+                    }
+                  ),
+                  isVideoCover ? (
+                    // For video covers we hide the dark background but still show the title on hover
+                    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none", children: /* @__PURE__ */ jsx("div", { className: "absolute bottom-[40%] left-0 right-0 p-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out", children: /* @__PURE__ */ jsx(
+                      "h3",
+                      {
+                        className: "font-medium text-lg mb-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out text-center",
+                        "data-koreanable": true,
+                        children: project.title
+                      }
+                    ) }) })
+                  ) : /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out", children: /* @__PURE__ */ jsx("div", { className: "absolute bottom-[40%] left-0 right-0 p-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out", children: /* @__PURE__ */ jsx(
+                    "h3",
+                    {
+                      className: "font-medium text-lg mb-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out text-center",
+                      "data-koreanable": true,
+                      children: project.title
+                    }
+                  ) }) })
+                ]
+              }
+            )
+          },
+          project.title
+        )
       );
     }) }) }),
     /* @__PURE__ */ jsx(AnimatePresence$1, { children: showModal && selectedProject && /* @__PURE__ */ jsx(
@@ -3136,35 +3336,32 @@ function Works$1() {
                 }
               },
               children: /* @__PURE__ */ jsx(CarouselContent, { className: "h-full", children: selectedProject.images.map((img) => /* @__PURE__ */ jsx(CarouselItem, { className: "relative w-full h-full flex items-center justify-center", children: /* @__PURE__ */ jsxs("div", { className: "relative inline-block max-w-full", children: [
-                img.mediaType === "video" && img.videoUrl ? /youtube\.com|youtu\.be|vimeo\.com/i.test(img.videoUrl) ? /* @__PURE__ */ jsx(
-                  "iframe",
+                img.mediaType === "video" && img.videoUrl ? /youtube\.com|youtu\.be|vimeo\.com/i.test(img.videoUrl) ? /* @__PURE__ */ jsx("div", { className: "w-[min(60vw)] h-[min(70vh)]", children: /* @__PURE__ */ jsx(
+                  YouTubePlayer,
                   {
-                    src: img.videoUrl.includes("youtu") ? img.videoUrl.replace(/watch\?v=/, "embed/").replace("youtu.be/", "www.youtube.com/embed/") : img.videoUrl.includes("vimeo") ? img.videoUrl.replace(/vimeo\.com\//, "player.vimeo.com/video/") : img.videoUrl,
-                    className: "max-w-full max-h-[60vh] object-contain rounded-lg",
+                    url: img.videoUrl,
                     title: selectedProject.title,
-                    frameBorder: "0",
-                    allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
-                    allowFullScreen: true
+                    className: "w-full h-full object-contain rounded-lg"
                   }
-                ) : /* @__PURE__ */ jsx(
+                ) }) : /* @__PURE__ */ jsx("div", { className: "w-[min(60vw)] h-[min(70vh)]", children: /* @__PURE__ */ jsx(
                   "video",
                   {
                     src: img.videoUrl || void 0,
-                    className: "max-w-full max-h-[60vh] object-contain rounded-lg",
+                    className: "w-full h-full object-contain rounded-lg",
                     controls: true,
                     autoPlay: true,
                     playsInline: true,
                     controlsList: "nodownload",
                     muted: true
                   }
-                ) : /* @__PURE__ */ jsx(
+                ) }) : /* @__PURE__ */ jsx("div", { className: "w-[min(90vw,1200px)] h-[min(80vh,800px)]", children: /* @__PURE__ */ jsx(
                   "img",
                   {
                     src: img.url,
                     alt: img.title,
-                    className: "max-w-full max-h-[60vh] object-contain rounded-lg"
+                    className: "w-full h-full object-contain rounded-lg"
                   }
-                ),
+                ) }),
                 /* @__PURE__ */ jsx(
                   "button",
                   {
@@ -5540,7 +5737,7 @@ const SummarySection = forwardRef((props, forwardedRef) => {
     "/videos/animation.mp4",
     "/videos/cinematic.mp4",
     "/videos/product.mp4",
-    "/videos/vfx.mp4"
+    "/videos/car.mp4"
   ];
   const videoRefs = useRef([]);
   const [selected, setSelected] = useState(null);
@@ -6680,18 +6877,14 @@ const route15 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: DebugOverflow
 }, Symbol.toStringTag, { value: 'Module' }));
 
-<<<<<<< HEAD
-const serverManifest = {'entry':{'module':'/assets/entry.client-C0dgAWPW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js'],'css':[]},'routes':{'root':{'id':'root','parentId':undefined,'path':'','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':true,'module':'/assets/root-vFQmW4a0.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js','/assets/useTranslation-C2uTB0a1.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/index-BgzGjlS9.js','/assets/chevron-right-BxmQk4H8.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/loading-counter-qJJaIxk0.js','/assets/elements-Dbp8aVoy.js','/assets/index-D3ZRcz1e.js','/assets/resolve-elements-WL2ErOKm.js'],'css':['/assets/root-qUBKWGo8.css']},'routes/($locale).ennode.digital._index':{'id':'routes/($locale).ennode.digital._index','parentId':'root','path':':locale?/ennode/digital','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CyQhggqy.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/carousel-9jwcCCO4.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js'],'css':[]},'routes/($locale).works.$category.$work':{'id':'routes/($locale).works.$category.$work','parentId':'routes/($locale).works.$category','path':':work','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BNXUzxL6.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/Combination-Bn4r43AQ.js','/assets/index-BgzGjlS9.js','/assets/utils-tQ8evKDJ.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/icon-CP4mJMRx.js','/assets/i18n-DH-wL5Eu.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).ennode.arc._index':{'id':'routes/($locale).ennode.arc._index','parentId':'root','path':':locale?/ennode/arc','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CnigBhY1.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/team-section-CkguuTle.js','/assets/i18n-DH-wL5Eu.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js'],'css':[]},'routes/($locale).news.$slug._index':{'id':'routes/($locale).news.$slug._index','parentId':'root','path':':locale?/news/:slug','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BRkCHnmW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/utils-tQ8evKDJ.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works.$category':{'id':'routes/($locale).works.$category','parentId':'root','path':':locale?/works/:category','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BjgdLnI0.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).contact._index':{'id':'routes/($locale).contact._index','parentId':'root','path':':locale?/contact','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB-XYw2H.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/index-D3ZRcz1e.js','/assets/utils-tQ8evKDJ.js','/assets/icon-CP4mJMRx.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).career._index':{'id':'routes/($locale).career._index','parentId':'root','path':':locale?/career','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-D4fZkf_X.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/index-D3ZRcz1e.js','/assets/i18n-DH-wL5Eu.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/utils-tQ8evKDJ.js'],'css':[]},'routes/($locale).ennode._index':{'id':'routes/($locale).ennode._index','parentId':'root','path':':locale?/ennode','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-oJw-tJEK.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon-$name':{'id':'routes/($locale).favicon-$name','parentId':'root','path':':locale?/favicon-$name','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon-_name-CZ0Ns0X4.js','imports':[],'css':[]},'routes/($locale).about._index':{'id':'routes/($locale).about._index','parentId':'root','path':':locale?/about','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-7zsO4kyg.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/utils-tQ8evKDJ.js','/assets/process-section-Bc9sS8WA.js','/assets/team-section-CkguuTle.js','/assets/contact-section-B-y5Wsm-.js','/assets/carousel-9jwcCCO4.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works._index':{'id':'routes/($locale).works._index','parentId':'root','path':':locale?/works','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-EhS2nDbo.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/i18n-DH-wL5Eu.js','/assets/useTranslation-C2uTB0a1.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/container-2TlAo-hG.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js','/assets/context-DOdfq747.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon.ico':{'id':'routes/($locale).favicon.ico','parentId':'root','path':':locale?/favicon/ico','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon.ico-l0sNRNKZ.js','imports':[],'css':[]},'routes/($locale).news._index':{'id':'routes/($locale).news._index','parentId':'root','path':':locale?/news','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB7MG7Cd.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/chevron-right-BxmQk4H8.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale)._index':{'id':'routes/($locale)._index','parentId':'root','path':':locale?','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BkceaKeC.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/contact-section-B-y5Wsm-.js','/assets/loading-counter-qJJaIxk0.js','/assets/process-section-Bc9sS8WA.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/resolve-elements-WL2ErOKm.js','/assets/contact-cta-section-BBuv_ViC.js'],'css':[]},'routes/debug.overflow':{'id':'routes/debug.overflow','parentId':'root','path':'debug/overflow','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/debug.overflow-C_wAp7uD.js','imports':['/assets/jsx-runtime-kF-aRxYe.js'],'css':[]}},'url':'/assets/manifest-3819fd4e.js','version':'3819fd4e'};
-=======
-const serverManifest = {'entry':{'module':'/assets/entry.client-C0dgAWPW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js'],'css':[]},'routes':{'root':{'id':'root','parentId':undefined,'path':'','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':true,'module':'/assets/root-DLZV-Wut.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js','/assets/useTranslation-C2uTB0a1.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/index-BgzGjlS9.js','/assets/chevron-right-BxmQk4H8.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/loading-counter-DsnkppEO.js','/assets/elements-Dbp8aVoy.js','/assets/index-D3ZRcz1e.js','/assets/resolve-elements-WL2ErOKm.js'],'css':['/assets/root-P1iKqB3L.css']},'routes/($locale).ennode.digital._index':{'id':'routes/($locale).ennode.digital._index','parentId':'root','path':':locale?/ennode/digital','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CyQhggqy.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/carousel-9jwcCCO4.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js'],'css':[]},'routes/($locale).works.$category.$work':{'id':'routes/($locale).works.$category.$work','parentId':'routes/($locale).works.$category','path':':work','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BNXUzxL6.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/Combination-Bn4r43AQ.js','/assets/index-BgzGjlS9.js','/assets/utils-tQ8evKDJ.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/icon-CP4mJMRx.js','/assets/i18n-DH-wL5Eu.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).ennode.arc._index':{'id':'routes/($locale).ennode.arc._index','parentId':'root','path':':locale?/ennode/arc','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CnigBhY1.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/team-section-CkguuTle.js','/assets/i18n-DH-wL5Eu.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js'],'css':[]},'routes/($locale).news.$slug._index':{'id':'routes/($locale).news.$slug._index','parentId':'root','path':':locale?/news/:slug','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BRkCHnmW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/utils-tQ8evKDJ.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works.$category':{'id':'routes/($locale).works.$category','parentId':'root','path':':locale?/works/:category','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BjgdLnI0.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).contact._index':{'id':'routes/($locale).contact._index','parentId':'root','path':':locale?/contact','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB-XYw2H.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/index-D3ZRcz1e.js','/assets/utils-tQ8evKDJ.js','/assets/icon-CP4mJMRx.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).career._index':{'id':'routes/($locale).career._index','parentId':'root','path':':locale?/career','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-D4fZkf_X.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/index-D3ZRcz1e.js','/assets/i18n-DH-wL5Eu.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/utils-tQ8evKDJ.js'],'css':[]},'routes/($locale).ennode._index':{'id':'routes/($locale).ennode._index','parentId':'root','path':':locale?/ennode','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-oJw-tJEK.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon-$name':{'id':'routes/($locale).favicon-$name','parentId':'root','path':':locale?/favicon-$name','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon-_name-CZ0Ns0X4.js','imports':[],'css':[]},'routes/($locale).about._index':{'id':'routes/($locale).about._index','parentId':'root','path':':locale?/about','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-7zsO4kyg.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/utils-tQ8evKDJ.js','/assets/process-section-Bc9sS8WA.js','/assets/team-section-CkguuTle.js','/assets/contact-section-B-y5Wsm-.js','/assets/carousel-9jwcCCO4.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works._index':{'id':'routes/($locale).works._index','parentId':'root','path':':locale?/works','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-EhS2nDbo.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/i18n-DH-wL5Eu.js','/assets/useTranslation-C2uTB0a1.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/container-2TlAo-hG.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js','/assets/context-DOdfq747.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon.ico':{'id':'routes/($locale).favicon.ico','parentId':'root','path':':locale?/favicon/ico','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon.ico-l0sNRNKZ.js','imports':[],'css':[]},'routes/($locale).news._index':{'id':'routes/($locale).news._index','parentId':'root','path':':locale?/news','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB7MG7Cd.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/chevron-right-BxmQk4H8.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale)._index':{'id':'routes/($locale)._index','parentId':'root','path':':locale?','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-0LyvcHd-.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/contact-section-B-y5Wsm-.js','/assets/loading-counter-DsnkppEO.js','/assets/process-section-Bc9sS8WA.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/resolve-elements-WL2ErOKm.js','/assets/contact-cta-section-BBuv_ViC.js'],'css':[]},'routes/debug.overflow':{'id':'routes/debug.overflow','parentId':'root','path':'debug/overflow','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/debug.overflow-C_wAp7uD.js','imports':['/assets/jsx-runtime-kF-aRxYe.js'],'css':[]}},'url':'/assets/manifest-d05aee7b.js','version':'d05aee7b'};
->>>>>>> 1ba6b83 (update)
+const serverManifest = {'entry':{'module':'/assets/entry.client-C0dgAWPW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js'],'css':[]},'routes':{'root':{'id':'root','parentId':undefined,'path':'','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':true,'module':'/assets/root-DVHKfh-e.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/i18n-DH-wL5Eu.js','/assets/context-DOdfq747.js','/assets/useTranslation-C2uTB0a1.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/index-BgzGjlS9.js','/assets/chevron-right-BxmQk4H8.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/loading-counter-CYzyiXZa.js','/assets/elements-Dbp8aVoy.js','/assets/index-D3ZRcz1e.js','/assets/resolve-elements-WL2ErOKm.js'],'css':['/assets/root-OKIoxCIv.css']},'routes/($locale).ennode.digital._index':{'id':'routes/($locale).ennode.digital._index','parentId':'root','path':':locale?/ennode/digital','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CyQhggqy.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/carousel-9jwcCCO4.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js'],'css':[]},'routes/($locale).works.$category.$work':{'id':'routes/($locale).works.$category.$work','parentId':'routes/($locale).works.$category','path':':work','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BNXUzxL6.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/Combination-Bn4r43AQ.js','/assets/index-BgzGjlS9.js','/assets/utils-tQ8evKDJ.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/icon-CP4mJMRx.js','/assets/i18n-DH-wL5Eu.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).ennode.arc._index':{'id':'routes/($locale).ennode.arc._index','parentId':'root','path':':locale?/ennode/arc','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CnigBhY1.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/team-section-CkguuTle.js','/assets/i18n-DH-wL5Eu.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js'],'css':[]},'routes/($locale).news.$slug._index':{'id':'routes/($locale).news.$slug._index','parentId':'root','path':':locale?/news/:slug','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-BRkCHnmW.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/utils-tQ8evKDJ.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works.$category':{'id':'routes/($locale).works.$category','parentId':'root','path':':locale?/works/:category','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-CpZIx-u-.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/icon-CP4mJMRx.js','/assets/utils-tQ8evKDJ.js','/assets/carousel-9jwcCCO4.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/elements-Dbp8aVoy.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).contact._index':{'id':'routes/($locale).contact._index','parentId':'root','path':':locale?/contact','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB-XYw2H.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/index-D3ZRcz1e.js','/assets/utils-tQ8evKDJ.js','/assets/icon-CP4mJMRx.js','/assets/use-mobile-BaVIqU-6.js','/assets/i18n-DH-wL5Eu.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).career._index':{'id':'routes/($locale).career._index','parentId':'root','path':':locale?/career','index':true,'caseSensitive':undefined,'hasAction':true,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-D4fZkf_X.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/index-D3ZRcz1e.js','/assets/i18n-DH-wL5Eu.js','/assets/Combination-Bn4r43AQ.js','/assets/check-BrZisPkV.js','/assets/utils-tQ8evKDJ.js'],'css':[]},'routes/($locale).ennode._index':{'id':'routes/($locale).ennode._index','parentId':'root','path':':locale?/ennode','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-oJw-tJEK.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon-$name':{'id':'routes/($locale).favicon-$name','parentId':'root','path':':locale?/favicon-$name','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon-_name-CZ0Ns0X4.js','imports':[],'css':[]},'routes/($locale).about._index':{'id':'routes/($locale).about._index','parentId':'root','path':':locale?/about','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-7zsO4kyg.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/utils-tQ8evKDJ.js','/assets/process-section-Bc9sS8WA.js','/assets/team-section-CkguuTle.js','/assets/contact-section-B-y5Wsm-.js','/assets/carousel-9jwcCCO4.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale).works._index':{'id':'routes/($locale).works._index','parentId':'root','path':':locale?/works','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-EhS2nDbo.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/i18n-DH-wL5Eu.js','/assets/useTranslation-C2uTB0a1.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/container-2TlAo-hG.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js','/assets/context-DOdfq747.js','/assets/createLucideIcon-C2Ywi-cO.js'],'css':[]},'routes/($locale).favicon.ico':{'id':'routes/($locale).favicon.ico','parentId':'root','path':':locale?/favicon/ico','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/(_locale).favicon.ico-l0sNRNKZ.js','imports':[],'css':[]},'routes/($locale).news._index':{'id':'routes/($locale).news._index','parentId':'root','path':':locale?/news','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-DB7MG7Cd.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/contact-section-B-y5Wsm-.js','/assets/container-2TlAo-hG.js','/assets/i18n-DH-wL5Eu.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/chevron-right-BxmQk4H8.js','/assets/contact-cta-section-BBuv_ViC.js','/assets/resolve-elements-WL2ErOKm.js'],'css':[]},'routes/($locale)._index':{'id':'routes/($locale)._index','parentId':'root','path':':locale?','index':true,'caseSensitive':undefined,'hasAction':false,'hasLoader':true,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/route-B4lv19sd.js','imports':['/assets/jsx-runtime-kF-aRxYe.js','/assets/utils-tQ8evKDJ.js','/assets/i18n-DH-wL5Eu.js','/assets/arrow-right-DofWVnUm.js','/assets/elements-Dbp8aVoy.js','/assets/contact-section-B-y5Wsm-.js','/assets/loading-counter-CYzyiXZa.js','/assets/process-section-Bc9sS8WA.js','/assets/container-2TlAo-hG.js','/assets/createLucideIcon-C2Ywi-cO.js','/assets/resolve-elements-WL2ErOKm.js','/assets/contact-cta-section-BBuv_ViC.js'],'css':[]},'routes/debug.overflow':{'id':'routes/debug.overflow','parentId':'root','path':'debug/overflow','index':undefined,'caseSensitive':undefined,'hasAction':false,'hasLoader':false,'hasClientAction':false,'hasClientLoader':false,'hasErrorBoundary':false,'module':'/assets/debug.overflow-C_wAp7uD.js','imports':['/assets/jsx-runtime-kF-aRxYe.js'],'css':[]}},'url':'/assets/manifest-0f0ea1c5.js','version':'0f0ea1c5'};
 
 /**
        * `mode` is only relevant for the old Remix compiler but
        * is included here to satisfy the `ServerBuild` typings.
        */
       const mode = "production";
-      const assetsBuildDirectory = "build/client";
+      const assetsBuildDirectory = "build\\client";
       const basename = "/";
       const future = {"v3_fetcherPersist":true,"v3_relativeSplatPath":true,"v3_throwAbortReason":true,"v3_routeConfig":false,"v3_singleFetch":true,"v3_lazyRouteDiscovery":false,"unstable_optimizeDeps":false};
       const isSpaMode = false;

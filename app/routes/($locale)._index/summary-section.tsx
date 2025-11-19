@@ -41,7 +41,7 @@ const SummarySection = forwardRef<HTMLElement>((props, forwardedRef) => {
     "/videos/animation.mp4",
     "/videos/cinematic.mp4",
     "/videos/product.mp4",
-    "/videos/vfx.mp4",
+    "/videos/car.mp4",
   ];
 
   // refs to control video playback on hover
