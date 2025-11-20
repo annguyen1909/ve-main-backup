@@ -26,7 +26,9 @@ class Api {
 
   constructor() {
     this.instance = axios.create({
-      baseURL: process.env.BASE_API_URL ?? 'https://api.visualennode.com',
+      // baseURL: process.env.BASE_API_URL ?? 'https://api.visualennode.com',
+      // baseURL: process.env.BASE_API_URL ?? 'http://bach9087.cafe24.com:8000',
+      baseURL: process.env.BASE_API_URL ?? 'http://localhost:8000',
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -119,6 +121,34 @@ class Api {
   getWork(locale: string, slug_work: string) {
     return this.instance.get<Resource<WorkResource>>(
       `/public/works/${slug_work}`,
+      {
+        headers: {
+          "Accept-Language": locale
+        },
+      }
+    );
+  }
+
+  // New public project endpoints - Get all published projects
+  getProjects(locale: string, query: string, tagId: string, sortBy?: string) {
+    return this.instance.get<ResourceCollection<any>>(
+      "/public/projects",
+      {
+        headers: {
+          "Accept-Language": locale
+        },
+        params: {
+          keywords: query,
+          tag_id: tagId,
+          sortBy: sortBy
+        }
+      }
+    );
+  }
+
+  getProject(locale: string, slug_project: string) {
+    return this.instance.get<Resource<any>>(
+      `/public/projects/${slug_project}`,
       {
         headers: {
           "Accept-Language": locale

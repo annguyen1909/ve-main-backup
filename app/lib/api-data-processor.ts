@@ -13,6 +13,7 @@ export interface OrganizedProjectImage {
   mediaType: 'image' | 'video';
   // when mediaType === 'video' this contains the playable URL
   videoUrl: string | null;
+  link_video?: string | null; // Alternative video URL field
   tags: string[];
 }
 

@@ -25,10 +25,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "~/components/ui/carousel";
-import { 
-  groupWorksByProject,
-  type OrganizedProject
-} from "~/lib/api-data-processor";
+import type { OrganizedProject } from "~/lib/api-data-processor";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const slug = params.category ?? "";
@@ -36,6 +33,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q") ?? "";
   const tagId = url.searchParams.get("tag_id") ?? "";
+  const sortBy = url.searchParams.get("sortBy") ?? "";
 
   const locale = params.locale ?? "en";
 
@@ -52,42 +50,60 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  let works;
+  // Use new public projects API
+  const projectsResponse = await api.getProjects(locale, query, tagId, sortBy).then((response) => response.data.data);
   
-  // Use new private projects API for image and cinematic categories
-  if (category.slug === 'image' || category.slug === 'cinematic') {
-    const projectsResponse = await api.getProjects(locale, query, tagId).then((response) => response.data.data);
-    
-    // Filter projects based on category - extract images or videos from each project
-    works = projectsResponse.flatMap((project: any) => {
-      if (category.slug === 'image' && project.images && Array.isArray(project.images)) {
-        // For image category, return all images from the project
-        return project.images.map((image: any) => ({
-          ...image,
-          project_title: project.title,
-          project_description: project.description,
-          project_slug: project.slug,
-        }));
-      } else if (category.slug === 'cinematic' && project.videos && Array.isArray(project.videos)) {
-        // For cinematic category, return all videos from the project
-        return project.videos.map((video: any) => ({
-          ...video,
-          project_title: project.title,
-          project_description: project.description,
-          project_slug: project.slug,
-        }));
-      }
-      return [];
-    });
-  } else {
-    // Use old API for other categories
-    works = await api.getWorks(locale, category.slug, query, tagId).then((response) => response.data.data);
+  // Ensure projectsResponse is an array
+  if (!projectsResponse || !Array.isArray(projectsResponse)) {
+    console.error('Invalid projects response:', projectsResponse);
+    return {
+      locale,
+      category,
+      projects: [],
+      tags: await api.getTags(locale).then((response) => response.data.data),
+    };
   }
   
+  // Filter and transform projects based on category
+  const projects = projectsResponse
+    .filter((project: any) => {
+      if (category.slug === 'image') {
+        return project.images && Array.isArray(project.images) && project.images.length > 0;
+      } else if (category.slug === 'cinematic') {
+        return project.video;
+      }
+      return false;
+    })
+    .map((project: any) => ({
+      title: project.project_name || project.title || '',
+      description: project.description || '',
+      slug: project.slug,
+      images: category.slug === 'image' 
+        ? project.images.map((img: any) => ({
+            id: img.id,
+            url: img.url,
+            title: project.project_name || '',
+            description: project.description || '',
+            type: 'Hero' as const,
+            mediaType: 'image' as const,
+            videoUrl: null,
+            tags: []
+          }))
+        : [{
+            id: project.id,
+            url: project.thumbnail?.url || project.video,
+            title: project.project_name || '',
+            description: project.description || '',
+            type: 'Hero' as const,
+            mediaType: 'video' as const,
+            videoUrl: project.video,
+            link_video: project.video,
+            tags: []
+          }],
+      totalImages: category.slug === 'image' ? project.images.length : 1
+    }));
+  
   const tags = await api.getTags(locale).then((response) => response.data.data);
-
-  // Group and normalize works into projects on the server so the client receives ready-to-render data
-  const projects = groupWorksByProject(works);
 
   return {
     locale,
@@ -114,7 +130,7 @@ export const meta: MetaFunction<typeof loader, { root: typeof rootLoader }> = ({
   ];
 };
 
-export default function Works() {
+export default function Projects() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { translations: t } = useOutletContext<AppContext>();
   const { projects, tags } = useLoaderData<typeof loader>();
@@ -124,9 +140,6 @@ export default function Works() {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [showModal, setShowModal] = useState(false);
   const [emblaApi, setEmblaApi] = useState<CarouselApi | null>(null);
-
-  // Projects are provided by the loader (server-side grouping & normalization)
-  // The loader already respects `q` and `tag_id` search params so changing them will reload data
 
   function handleImageClick(project: OrganizedProject, imageIndex: number = 0) {
     setSelectedProject(project);
@@ -146,7 +159,6 @@ export default function Works() {
 
       const totalImages = selectedProject.images.length;
 
-      // Prefer embla for smooth animation when available
       if (emblaApi) {
         if (direction === "prev") emblaApi.scrollPrev();
         else emblaApi.scrollNext();
@@ -168,7 +180,6 @@ export default function Works() {
     }
   }, [showSearch, setSearchParams]);
 
-  // Handle left/right arrow keys to navigate while modal is open
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (!showModal) return;
@@ -193,7 +204,6 @@ export default function Works() {
     };
   }, [showModal, navigateImage]);
 
-  // Disable right-click (context menu) on this page while mounted.
   useEffect(() => {
     function onContextMenu(e: Event) {
       e.preventDefault();
@@ -204,7 +214,6 @@ export default function Works() {
 
   return (
     <section className="min-h-dvh h-auto text-white pt-20">
-      {/* Search and Filter Header */}
       <Container
         variant="fluid"
         className="sm:!px-10 mt-4 !py-0 flex flex-col md:flex-row md:items-center gap-5 md:gap-7"
@@ -271,12 +280,13 @@ export default function Works() {
         </AnimatePresence>
       </Container>
 
-      {/* Projects Grid - One image per project */}
       <Container variant="fluid" className="sm:!px-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-2">
           {projects.map((project, projectIndex) => {
-            const coverImage = project.images[0]; // Use first image as project cover
-            const isVideoCover = coverImage.mediaType === 'video' && !!coverImage.videoUrl;
+            const coverImage = project.images?.[0];
+            if (!coverImage) return null; // Skip projects without images
+            
+            const isVideoCover = coverImage.videoUrl || coverImage.link_video;
 
             return (
               <button
@@ -285,35 +295,31 @@ export default function Works() {
                 onClick={() => handleImageClick(project, 0)}
                 className="group cursor-pointer"
                 onMouseEnter={() => {
-                  // Play the nested video element if present
                   const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`) as HTMLVideoElement | null;
                   if (vid) {
                     vid.play().catch(() => {});
                   }
                 }}
                 onMouseLeave={() => {
-                  // Pause the nested video element if present
                   const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`) as HTMLVideoElement | null;
                   if (vid) {
                     vid.pause();
                   }
                 }}
               >
-                {/* Project Cover Image */}
                 <div
                   className={`aspect-[4/3] relative overflow-hidden transition-all duration-300 ${isVideoCover ? 'group-hover:shadow-2xl' : 'group-hover:shadow-2xl group-hover:bg-white/60'}`}
                 >
-                  {coverImage.mediaType === 'video' && coverImage.videoUrl ? (
-                    // If the videoUrl is a YouTube or Vimeo link, embed via iframe; otherwise use a native <video>
-                    (/youtube\.com|youtu\.be|vimeo\.com/i).test(coverImage.videoUrl) ? (
+                  {isVideoCover ? (
+                    (/youtube\.com|youtu\.be|vimeo\.com/i).test((coverImage.videoUrl || coverImage.link_video || '')) ? (
                       <iframe
                         className="w-full h-full object-cover"
                         src={
-                          coverImage.videoUrl.includes('youtu')
-                            ? coverImage.videoUrl.replace(/watch\?v=/, 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')
-                            : coverImage.videoUrl.includes('vimeo')
-                            ? coverImage.videoUrl.replace(/vimeo\.com\//, 'player.vimeo.com/video/')
-                            : coverImage.videoUrl
+                          (coverImage.videoUrl || coverImage.link_video || '').includes('youtu')
+                            ? (coverImage.videoUrl || coverImage.link_video || '').replace(/watch\?v=/, 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')
+                            : (coverImage.videoUrl || coverImage.link_video || '').includes('vimeo')
+                            ? (coverImage.videoUrl || coverImage.link_video || '').replace(/vimeo\.com\//, 'player.vimeo.com/video/')
+                            : (coverImage.videoUrl || coverImage.link_video)
                         }
                         title={project.title}
                         frameBorder="0"
@@ -323,14 +329,13 @@ export default function Works() {
                     ) : (
                       <video
                         className="w-full h-full object-cover"
-                        src={coverImage.videoUrl}
+                        src={coverImage.videoUrl || coverImage.link_video}
                         muted
                         playsInline
                         loop
                         preload="metadata"
                         data-project-index={projectIndex}
                         onLoadedMetadata={(e) => {
-                          // Seek a tiny amount to force the browser to render the first frame while paused
                           try {
                             const v = e.currentTarget as HTMLVideoElement;
                             if (v.readyState >= 1) {
@@ -346,15 +351,13 @@ export default function Works() {
                   ) : (
                     <img
                       src={coverImage.url}
-                      alt={project.title}
+                      alt={project.title || ''}
                       className="w-full h-full group-hover:scale-105 group-hover:blur-[1.5px] object-cover transition-transform duration-300"
                       loading="lazy"
                     />
                   )}
 
-                  {/* Overlay with project info - only visible on hover (hidden for video covers) */}
                   {isVideoCover ? (
-                    // For video covers we hide the dark background but still show the title on hover
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none">
                       <div className="absolute bottom-[40%] left-0 right-0 p-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out">
                         <h3
@@ -384,7 +387,6 @@ export default function Works() {
         </div>
       </Container>
 
-      {/* Simplified Project Modal - Main image with thumbnails below */}
       <AnimatePresence>
         {showModal && selectedProject && (
           <motion.div
@@ -400,9 +402,6 @@ export default function Works() {
             }}
           >
             <div className="relative w-full h-full max-w-7xl max-h-full flex flex-col">
-              {/* (Close button moved inside main image display for better placement) */}
-
-              {/* Project Title */}
               <div className="text-center mb-4 px-4">
                 <h2
                   className="text-2xl lg:text-3xl font-medium text-white mb-2"
@@ -415,7 +414,6 @@ export default function Works() {
                 </p>
               </div>
 
-              {/* Main Image Display (shadcn Carousel) */}
               <div className="flex-1 flex items-center justify-center min-h-0 mb-6 relative">
                 <Carousel
                   setApi={(api: CarouselApi | undefined) => {
@@ -428,7 +426,6 @@ export default function Works() {
                       });
                     }
                     if (typeof api.scrollTo === "function") {
-                      // do not pass `true` (jump) here — let embla animate the initial scroll
                       api.scrollTo(selectedImageIndex || 0);
                     }
                   }}
@@ -436,21 +433,16 @@ export default function Works() {
                   <CarouselContent className="h-full">
                     {selectedProject.images.map((img) => (
                       <CarouselItem key={img.id} className="relative w-full h-full flex items-center justify-center">
-                        {/*
-                          Wrap the actual media inside a positioned inline-block container so
-                          the close button can be absolutely positioned relative to the visible
-                          image (not the full slide area which includes carousel gutters).
-                        */}
                         <div className="relative inline-block max-w-full">
-                          {img.mediaType === 'video' && img.videoUrl ? (
-                            (/youtube\.com|youtu\.be|vimeo\.com/i).test(img.videoUrl) ? (
+                          {(img.videoUrl || img.link_video) ? (
+                            (/youtube\.com|youtu\.be|vimeo\.com/i).test((img.videoUrl || img.link_video || '')) ? (
                               <iframe
                                 src={
-                                  img.videoUrl.includes('youtu')
-                                    ? img.videoUrl.replace(/watch\?v=/, 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')
-                                    : img.videoUrl.includes('vimeo')
-                                    ? img.videoUrl.replace(/vimeo\.com\//, 'player.vimeo.com/video/')
-                                    : img.videoUrl
+                                  (img.videoUrl || img.link_video || '').includes('youtu')
+                                    ? (img.videoUrl || img.link_video || '').replace(/watch\?v=/, 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')
+                                    : (img.videoUrl || img.link_video || '').includes('vimeo')
+                                    ? (img.videoUrl || img.link_video || '').replace(/vimeo\.com\//, 'player.vimeo.com/video/')
+                                    : (img.videoUrl || img.link_video || '')
                                 }
                                 className="max-w-full max-h-[60vh] object-contain rounded-lg"
                                 title={selectedProject.title}
@@ -460,7 +452,7 @@ export default function Works() {
                               />
                             ) : (
                               <video
-                                src={img.videoUrl || undefined}
+                                src={img.videoUrl || img.link_video || undefined}
                                 className="max-w-full max-h-[60vh] object-contain rounded-lg"
                                 controls
                                 autoPlay
@@ -472,7 +464,7 @@ export default function Works() {
                           ) : (
                             <img
                               src={img.url}
-                              alt={img.title}
+                              alt={img.title || ''}
                               className="max-w-full max-h-[60vh] object-contain rounded-lg"
                             />
                           )}
@@ -491,25 +483,23 @@ export default function Works() {
                 </Carousel>
               </div>
 
-                {/* Navigation Arrows */}
-                {selectedProject.images.length > 1 && (
-                  <>
-                    <button
-                      onClick={() => navigateImage('prev')}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-3"
-                    >
-                      <ChevronLeftIcon className="w-6 h-6" />
-                    </button>
-                    <button
-                      onClick={() => navigateImage('next')}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-3"
-                    >
-                      <ChevronRightIcon className="w-6 h-6" />
-                    </button>
-                  </>
-                )}
+              {selectedProject.images.length > 1 && (
+                <>
+                  <button
+                    onClick={() => navigateImage('prev')}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-3"
+                  >
+                    <ChevronLeftIcon className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={() => navigateImage('next')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-3"
+                  >
+                    <ChevronRightIcon className="w-6 h-6" />
+                  </button>
+                </>
+              )}
               
-              {/* Thumbnail Strip Below Main Image */}
               <div className="flex-none px-2 sm:px-4 pb-4">
                 <div className="flex gap-1 sm:gap-2 justify-start sm:justify-center scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pb-2">
                   {selectedProject.images.map((image, index) => (
@@ -518,7 +508,6 @@ export default function Works() {
                       type="button"
                       onClick={() => {
                         if (emblaApi && typeof emblaApi.scrollTo === 'function') {
-                          // pass only the index so embla performs a smooth animated scroll
                           emblaApi.scrollTo(index);
                         } else {
                           setSelectedImageIndex(index);
@@ -536,9 +525,8 @@ export default function Works() {
                         className="w-full h-full object-cover"
                         loading="lazy"
                         onError={(e) => {
-                          // Fallback to attachment_url if optimize_attachment_url fails
                           const img = e.target as HTMLImageElement;
-                          if (img.src.includes('optimize_attachment_url')) {
+                          if (image.url && img.src.includes('optimize_attachment_url')) {
                             const fallbackSrc = image.url.replace(/optimize_attachment_url/g, 'attachment_url');
                             img.src = fallbackSrc;
                           }
@@ -548,13 +536,12 @@ export default function Works() {
                   ))}
                 </div>
 
-                {/* Simple Project Info: show correct singular/plural for images/videos */}
                 <div className="mt-2 sm:mt-4 text-center text-gray-300">
                   <span className="text-xs sm:text-sm">
                     {(() => {
                       const imgs = selectedProject.images;
-                      const imageCount = imgs.filter((it) => it.mediaType === 'image').length;
-                      const videoCount = imgs.filter((it) => it.mediaType === 'video').length;
+                      const imageCount = imgs.filter((it) => !it.videoUrl && !it.link_video).length;
+                      const videoCount = imgs.filter((it) => it.videoUrl || it.link_video).length;
 
                       if (videoCount > 0 && imageCount === 0) {
                         return `${videoCount} ${videoCount === 1 ? 'video' : 'videos'}`;
@@ -564,7 +551,6 @@ export default function Works() {
                         return `${imageCount} ${imageCount === 1 ? 'image' : 'images'}`;
                       }
 
-                      // Mixed media
                       return `${videoCount} ${videoCount === 1 ? 'video' : 'videos'} · ${imageCount} ${imageCount === 1 ? 'image' : 'images'}`;
                     })()}
                   </span>
