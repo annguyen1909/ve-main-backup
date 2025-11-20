@@ -52,38 +52,9 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  let works;
-  
-  // Use new private projects API for image and cinematic categories
-  if (category.slug === 'image' || category.slug === 'cinematic') {
-    const projectsResponse = await api.getProjects(locale, query, tagId).then((response) => response.data.data);
-    
-    // Filter projects based on category - extract images or videos from each project
-    works = projectsResponse.flatMap((project: any) => {
-      if (category.slug === 'image' && project.images && Array.isArray(project.images)) {
-        // For image category, return all images from the project
-        return project.images.map((image: any) => ({
-          ...image,
-          project_title: project.title,
-          project_description: project.description,
-          project_slug: project.slug,
-        }));
-      } else if (category.slug === 'cinematic' && project.videos && Array.isArray(project.videos)) {
-        // For cinematic category, return all videos from the project
-        return project.videos.map((video: any) => ({
-          ...video,
-          project_title: project.title,
-          project_description: project.description,
-          project_slug: project.slug,
-        }));
-      }
-      return [];
-    });
-  } else {
-    // Use old API for other categories
-    works = await api.getWorks(locale, category.slug, query, tagId).then((response) => response.data.data);
-  }
-  
+  const works = await api
+    .getWorks(locale, category.slug, query, tagId)
+    .then((response) => response.data.data);
   const tags = await api.getTags(locale).then((response) => response.data.data);
 
   // Group and normalize works into projects on the server so the client receives ready-to-render data

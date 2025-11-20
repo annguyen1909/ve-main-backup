@@ -35,8 +35,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
   }
 
   try {
-    // Use new private project endpoint
-    work = await api.getProject(locale, workSlug).then((response) => response.data.data)
+    work = await api.getWork(locale, workSlug).then((response) => response.data.data)
   } catch {
     throw new Response("Not Found", { status: 404 });
   }

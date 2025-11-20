@@ -39,83 +39,132 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
   const api = new Api();
 
-  const categories = await api
-    .getCategories(locale)
-    .then((response) => response.data.data);
-  const category = categories.find(
-    (category: CategoryResource) => category.slug === slug
-  );
+  try {
+    const categories = await api
+      .getCategories(locale)
+      .then((response) => response.data.data);
+    const category = categories.find(
+      (category: CategoryResource) => category.slug === slug
+    );
 
-  if (!category) {
-    throw new Response("Not Found", { status: 404 });
-  }
+    if (!category) {
+      throw new Response("Not Found", { status: 404 });
+    }
 
-  // Use new public projects API
-  const projectsResponse = await api.getProjects(locale, query, tagId, sortBy).then((response) => response.data.data);
-  
-  // Ensure projectsResponse is an array
-  if (!projectsResponse || !Array.isArray(projectsResponse)) {
-    console.error('Invalid projects response:', projectsResponse);
-    return {
-      locale,
-      category,
-      projects: [],
-      tags: await api.getTags(locale).then((response) => response.data.data),
-    };
-  }
-  
-  // Filter and transform projects based on category
-  const projects = projectsResponse
-    .filter((project: any) => {
+    // Use new public projects API
+    const projectsResponse = await api.getProjects(locale, query, tagId, sortBy).then((response) => response.data.data);
+    
+    // Ensure projectsResponse is an array
+    if (!projectsResponse || !Array.isArray(projectsResponse)) {
+      return {
+        locale,
+        category,
+        projects: [],
+        tags: await api.getTags(locale).then((response) => response.data.data),
+      };
+    }
+    
+    // Transform all projects - don't filter out empty ones
+    // Each project is one card with thumbnail as cover
+    const projects = projectsResponse
+    .map((project: any) => {
       if (category.slug === 'image') {
-        return project.images && Array.isArray(project.images) && project.images.length > 0;
-      } else if (category.slug === 'cinematic') {
-        return project.video;
-      }
-      return false;
-    })
-    .map((project: any) => ({
-      title: project.project_name || project.title || '',
-      description: project.description || '',
-      slug: project.slug,
-      images: category.slug === 'image' 
-        ? project.images.map((img: any) => ({
-            id: img.id,
-            url: img.url,
-            title: project.project_name || '',
-            description: project.description || '',
-            type: 'Hero' as const,
-            mediaType: 'image' as const,
-            videoUrl: null,
-            tags: []
-          }))
-        : [{
+        // For image projects: use thumbnail as cover, all images inside
+        const imageItems = project.images.filter((img: any) => img.type === 'image');
+        return {
+          title: project.project_name || project.title || '',
+          description: project.description || '',
+          slug: project.slug,
+          // First image in array is the thumbnail (cover)
+          images: [
+            // Thumbnail as first image
+            {
+              id: project.thumbnail?.id || `thumb-${project.id}`,
+              url: project.thumbnail?.url || imageItems[0]?.url || '',
+              title: project.project_name || '',
+              description: project.description || '',
+              type: 'Hero' as const,
+              mediaType: 'image' as const,
+              videoUrl: null,
+              tags: []
+            },
+            // Then all actual images
+            ...imageItems.map((img: any) => ({
+              id: img.id,
+              url: img.url,
+              title: project.project_name || '',
+              description: project.description || '',
+              type: 'Hero' as const,
+              mediaType: 'image' as const,
+              videoUrl: null,
+              tags: []
+            }))
+          ],
+          totalImages: imageItems.length + 1
+        };
+      } else {
+        // For video projects: use thumbnail as cover
+        return {
+          title: project.project_name || project.title || '',
+          description: project.description || '',
+          slug: project.slug,
+          images: [{
             id: project.id,
-            url: project.thumbnail?.url || project.video,
+            url: project.thumbnail?.url || '',
             title: project.project_name || '',
             description: project.description || '',
             type: 'Hero' as const,
             mediaType: 'video' as const,
-            videoUrl: project.video,
-            link_video: project.video,
+            videoUrl: project.link_video || project.video || null,
+            link_video: project.link_video || project.video || null,
             tags: []
           }],
-      totalImages: category.slug === 'image' ? project.images.length : 1
-    }));
-  
-  const tags = await api.getTags(locale).then((response) => response.data.data);
+          totalImages: 1
+        };
+      }
+    });
+    
+    const tags = await api.getTags(locale).then((response) => response.data.data);
 
-  return {
-    locale,
-    category,
-    projects,
-    tags,
-  };
+    return {
+      locale,
+      category,
+      projects,
+      tags,
+    };
+  } catch (error) {
+    console.error('Route /r/$category loader error:', error);
+    // Return empty state instead of throwing to prevent infinite error loop
+    return {
+      locale,
+      category: {
+        id: 0,
+        parent_id: null,
+        title: { en: slug, ko: slug },
+        slug: slug,
+        description: { en: '', ko: '' },
+        group: '',
+        published_at: '',
+        created_at: '',
+        updated_at: ''
+      },
+      projects: [],
+      tags: [],
+    };
+  }
 }
 
 export const meta: MetaFunction<typeof loader, { root: typeof rootLoader }> = ({
   data,
 }) => {
+  const categoryTitle = typeof data?.category?.title === 'string' 
+    ? data.category.title 
+    : (data?.category?.title as any)?.[data?.locale || 'en'] || (data?.category?.title as any)?.en || '';
+  
+  const categoryDescription = typeof data?.category?.description === 'string'
+    ? data.category.description
+    : (data?.category?.description as any)?.[data?.locale || 'en'] || (data?.category?.description as any)?.en || '';
+
   return [
     {
       title: title(
@@ -123,17 +172,17 @@ export const meta: MetaFunction<typeof loader, { root: typeof rootLoader }> = ({
           ? data.category.slug === "image"
             ? "조감도 | 투시도 | 건축CG | 분양CG"
             : "건축CG영상"
-          : data?.category.title
+          : categoryTitle
       ),
     },
-    { name: "description", content: data?.category.description },
+    { name: "description", content: categoryDescription },
   ];
 };
 
 export default function Projects() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { translations: t } = useOutletContext<AppContext>();
-  const { projects, tags } = useLoaderData<typeof loader>();
+  const { projects, tags, locale } = useLoaderData<typeof loader>();
   const [showSearch, setShowSearch] = useState(searchParams.get("q") ?? false);
   const [selectedProject, setSelectedProject] =
     useState<OrganizedProject | null>(null);
@@ -271,7 +320,7 @@ export default function Projects() {
                       setSearchParams(params);
                     }}
                   >
-                    {tag.name}
+                    {typeof tag.name === 'string' ? tag.name : (tag.name as any)[locale] || (tag.name as any).en}
                   </button>
                 ))}
               </div>
@@ -284,16 +333,16 @@ export default function Projects() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-2">
           {projects.map((project, projectIndex) => {
             const coverImage = project.images?.[0];
-            if (!coverImage) return null; // Skip projects without images
-            
-            const isVideoCover = coverImage.videoUrl || coverImage.link_video;
+            const hasImages = coverImage && project.images.length > 0;
+            const isVideoCover = coverImage?.videoUrl || coverImage?.link_video;
 
             return (
               <button
-                key={project.title}
+                key={project.slug || project.title}
                 type="button"
-                onClick={() => handleImageClick(project, 0)}
-                className="group cursor-pointer"
+                onClick={() => hasImages && handleImageClick(project, 0)}
+                className={`group ${hasImages ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                disabled={!hasImages}
                 onMouseEnter={() => {
                   const vid = document.querySelector(`video[data-project-index="${projectIndex}"]`) as HTMLVideoElement | null;
                   if (vid) {
@@ -310,7 +359,14 @@ export default function Projects() {
                 <div
                   className={`aspect-[4/3] relative overflow-hidden transition-all duration-300 ${isVideoCover ? 'group-hover:shadow-2xl' : 'group-hover:shadow-2xl group-hover:bg-white/60'}`}
                 >
-                  {isVideoCover ? (
+                  {!coverImage ? (
+                    // Placeholder for projects without images
+                    <img
+                      src="/favicon-dark.jpg"
+                      alt={project.title || 'No thumbnail'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : isVideoCover ? (
                     (/youtube\.com|youtu\.be|vimeo\.com/i).test((coverImage.videoUrl || coverImage.link_video || '')) ? (
                       <iframe
                         className="w-full h-full object-cover"
@@ -354,6 +410,13 @@ export default function Projects() {
                       alt={project.title || ''}
                       className="w-full h-full group-hover:scale-105 group-hover:blur-[1.5px] object-cover transition-transform duration-300"
                       loading="lazy"
+                      onError={(e) => {
+                        // Fallback to favicon-dark.jpg if image fails to load
+                        const img = e.target as HTMLImageElement;
+                        if (img.src !== '/favicon-dark.jpg') {
+                          img.src = '/favicon-dark.jpg';
+                        }
+                      }}
                     />
                   )}
 

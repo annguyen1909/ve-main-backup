@@ -1,4 +1,0 @@
-User-agent: *
-Disallow:
-
-Sitemap: https://visualennode.com/sitemap.xml
